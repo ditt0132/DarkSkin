@@ -1,0 +1,51 @@
+package dittonut.darkskin;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.entity.Player;
+import org.bukkit.generator.BiomeProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Team;
+
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.SkinsRestorerProvider;
+
+public class DarkSkin extends JavaPlugin {
+  public static DarkSkin instance;
+    public static ProtocolManager pm;
+    public static SkinsRestorer sr;
+  public static DarkSkin getInstance() { return instance; }
+  public static final MiniMessage mm = MiniMessage.miniMessage();
+    @Override
+    public void onEnable() {
+        instance = this;
+        for (Team t : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
+            if (Bukkit.getWorld("nether_"+t.getName()) != null) return;
+            Bukkit.createWorld(new WorldCreator("nether_"+t.getName()).environment(World.Environment.NETHER).generatorSettings("NETHER"));
+            t.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        }
+        sr = SkinsRestorerProvider.get();
+        pm = ProtocolLibrary.getProtocolManager();
+        Bukkit.getPluginManager().registerEvents(new Events(), this);
+        for (World world : Bukkit.getWorlds()) {
+        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
+    }
+        getLogger().info("Enabled!");
+    }
+
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
+        getLogger().info("Disabled!");
+    }
+
+    public String getTeamName(Player player) {
+    return Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.hasPlayer(player)).findFirst().orElseThrow().getName();
+    }
+}
