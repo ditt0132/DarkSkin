@@ -4,8 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
-import org.bukkit.generator.BiomeProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
 
@@ -36,12 +36,23 @@ public class DarkSkin extends JavaPlugin {
         for (World world : Bukkit.getWorlds()) {
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
     }
+        Bukkit.getScheduler().runTaskTimer(this, Pylon::updateBeacon, 0L, 1200L); //1분마다 신호기를 업데이트해요!
+    Bukkit.getScheduler().runTaskTimer(this, () -> {
+      
+    }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
+    Bukkit.getScheduler().runTaskTimer(this, () -> {
+      Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().getEnvironment() == Environment.NETHER).asList().forEach(p -> {
+        p.setFireTicks(20);
+        p.
+      });
+    }, 0L, 20L);
         getLogger().info("Enabled!");
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    Pylon.updateBeacon(); //혹시 몰라요
         getLogger().info("Disabled!");
     }
 
