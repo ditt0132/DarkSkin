@@ -9,17 +9,18 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.Inventory;
@@ -33,14 +34,16 @@ import net.skinsrestorer.api.property.InputDataResult;
 
 public class Events implements Listener {
   @EventHandler
-  public void onUnload(ChunkUnloadEvent e) {
-    //if its in pylon range: //hard
-    //cancel event
+  public void onLoot(LootGenerateEvent e) {
+    e.getLoot().replaceAll(i -> i.getType() == Material.ENCHANTED_BOOK ? PylonGUI.getDailyReward() : i); //If item is enchantedbook: set item to daily reward
   }
 
   @EventHandler
-  public void onLoot(LootGenerateEvent e) {
-    e.getLoot().replaceAll(i -> i.getType() == Material.ENCHANTED_BOOK ? PylonGUI.getDailyReward() : i); //If item is enchantedbook: set item to daily reward
+  public void onPlace(BlockPlaceEvent e) {
+    Location location = e.getBlockPlaced().getLocation();
+    if (e.getBlockPlaced().getState() instanceof Sign && !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25)) {
+
+    }
   }
 
   @EventHandler
@@ -51,8 +54,8 @@ public class Events implements Listener {
     }
   }
 
-    @EventHandler
-    public void onChat(AsyncChatEvent e) {
+  @EventHandler
+  public void onChat(AsyncChatEvent e) {
         e.setCancelled(true);
         e.getPlayer().getLocation().getNearbyPlayers(25).forEach(p -> {
         p.sendMessage(mm.deserialize("<dark_green>[%.0f] <reset>"
@@ -60,7 +63,8 @@ public class Events implements Listener {
         //TODO: add name if needed
         .append(e.message()));
     });
-    }
+    e.viewers().removeIf(p -> )
+  }
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
@@ -72,15 +76,16 @@ public class Events implements Listener {
     public void onUseContainer(InventoryOpenEvent e) {
         if (e.getInventory() instanceof EnchantingInventory) {
             e.setCancelled(true);
-            e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer()));
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
         } else if (e.getView().title().equals(Component.text("DebugChest")) && e.getPlayer().isOp()) {
       e.setCancelled(true);
       Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
       List<ItemStack> i = new ArrayList<>();
       i.add(Enums.getStardust());
       i.add(Enums.getObsipotion());
+      i.add(Enums.getStarpiece());
       inv.addItem(i.toArray(new ItemStack[0]));
-      e.getPlayer().openInventory(inv);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
     }
     }
 
@@ -98,14 +103,15 @@ public class Events implements Listener {
         String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
         InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
         sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
+        
     }
 
   @EventHandler
   public void onPortal(PlayerPortalEvent e) {
     if (!e.getTo().getWorld().getName().equals("nether")) return;
     Location loc = e.getTo().clone();
-    loc.setWorld(Bukkit.getWorld("nether_"+e.getPlayer().getName()));
+    loc.setWorld(Bukkit.getWorld("nether_"+Family.getTeam(e.getPlayer()).getName().substring(3)));
     e.setTo(loc);
   }
-
+  
 }

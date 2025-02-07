@@ -1,17 +1,20 @@
 package dittonut.darkskin;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
 public class Family {
   public static Team getByOwner(String ownerName) {
-    return Bukkit.getScoreboardManager().getMainScoreboard().getTeam(ownerName);
+    return Bukkit.getScoreboardManager().getMainScoreboard().getTeam("dt."+ownerName);
   }
-  public void removeMember(Player removed) {
-    team.removePlayer(removed);
+  
+  public static Team getTeam(UUID id) {
+    return Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(id));
   }
-  public static void addMember() {
-
+public static Team getTeam(Player p) {
+    return getTeam(p);
   }
 }

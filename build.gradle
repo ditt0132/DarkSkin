@@ -24,7 +24,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
-    implementation 'org.spongepowered:configurate-hocon:4.0.0'
+    implementation 'org.spongepowered:configurate-yaml:4.0.0'
     compileOnly "net.skinsrestorer:skinsrestorer-api:15.5.2"
 }
 
