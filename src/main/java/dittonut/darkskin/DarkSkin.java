@@ -56,10 +56,9 @@ public class DarkSkin extends JavaPlugin {
 
         }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
         Bukkit.getScheduler().runTaskTimer(this, () -> {
-            Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().getEnvironment() == Environment.NETHER).forEach(p -> {
-                p.setFireTicks(20);
-
-            });
+            Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> p.getWorld().getEnvironment() == Environment.NETHER)
+                    .forEach(p -> p.setFireTicks(20));
         }, 0L, 20L);
         getLogger().info("Enabled!");
     }

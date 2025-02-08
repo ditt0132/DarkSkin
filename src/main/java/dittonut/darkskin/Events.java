@@ -6,7 +6,9 @@ import static dittonut.darkskin.DarkSkin.sr;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
@@ -16,12 +18,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.Inventory;
@@ -32,8 +36,40 @@ import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
+import org.bukkit.util.Vector;
 
 public class Events implements Listener {
+
+// 우리 귀여운 더티가 해줄거야
+//    @EventHandler
+//    public void onJump(PlayerJumpEvent e) {
+//        //System.out.println("WTF");
+//        if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().isCollidable()) e.getPlayer().setAllowFlight(true);
+//    }
+
+// 더티더티가 해주겠죠
+//    @EventHandler
+//    public void onDamage(EntityDamageEvent e) {
+//        if (!(e instanceof Player p)) return;
+//        if (!(e.getCause() == EntityDamageEvent.DamageCause.FALL)) return;
+//        if (p.getInventory().getBoots().isEmpty()) e.setCancelled(true); //여기에 아이템 강화 삽입
+//    }
+//이것도 더티가 해주겠죠
+//    @EventHandler
+//    public void onFlight(PlayerToggleFlightEvent e) {
+//        Player p = e.getPlayer();
+//        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR) return;
+//        Vector direction = p.getLocation().getDirection();
+//        Vector knockback = new Vector(direction.getX(), 0, direction.getZ()).normalize();//.multiply(1);
+//        knockback.setY(0.60);
+//        p.setVelocity(knockback);
+//        p.setAllowFlight(false);
+//        Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
+//            p.setFlying(false);
+//            //e.getPlayer().setAllowFlight(true);
+//        }); //
+//    }
+
     private static final double MAX_DISTANCE_SQUARED = 25.0d;
 
     @EventHandler
