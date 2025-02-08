@@ -44,7 +44,7 @@ public class DarkSkin extends JavaPlugin {
         for (World world : Bukkit.getWorlds()) {
             world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         }
-        Bukkit.getScheduler().runTaskTimer(this, Bukkit.getOnlinePlayers().forEach(p -> {
+        Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.getOnlinePlayers().forEach(p -> {
             if (!Variables.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
                 p.sendMessage(mm.deserialize("<red>금지된 아이템을 소지 중이에요! (ELYTRA)"));
                 getLogger().info("[BanItem] %s have ELYTRA!".formatted(p.getName()));
@@ -58,7 +58,7 @@ public class DarkSkin extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             Bukkit.getOnlinePlayers().stream().filter(p -> p.getWorld().getEnvironment() == Environment.NETHER).forEach(p -> {
                 p.setFireTicks(20);
-                p.damage(2, fireDamage);
+
             });
         }, 0L, 20L);
         getLogger().info("Enabled!");
