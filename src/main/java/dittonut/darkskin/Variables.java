@@ -11,8 +11,9 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 public class Variables {
-  public static Set<UUID> patrolers = new HashSet<>();
-  public static Set<UUID> rewarded = new HashSet<>();
-  public static Map<UUID, Pair<Location, Integer>> beacons = new HashMap<>();
-  public static Set<Chunk> forceloads = new HashSet<>();
+    // this does not include riders, only the elytra one
+    public static Set<UUID> patrolers = new HashSet<>();
+    public static Set<UUID> rewarded = new HashSet<>();
+    public static Map<UUID, Pair<Location, Integer>> beacons = new HashMap<>();
+    public static Set<Chunk> forceloads = new HashSet<>();
 }

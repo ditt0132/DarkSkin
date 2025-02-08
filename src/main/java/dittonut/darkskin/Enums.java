@@ -52,7 +52,7 @@ public static ItemStack getStarpiece() {
         PotionMeta meta = (PotionMeta) item.getItemMeta();
         meta.setColor(Color.fromRGB(40, 35, 54)); // #282336
         meta.displayName(OBSI_POTION_NAME);
-        meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 10800, 0), true);
+        meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 216000, 0), true);
         item.setItemMeta(meta);
         return item;
     }
