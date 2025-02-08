@@ -26,6 +26,9 @@ dependencies {
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
     implementation 'org.spongepowered:configurate-yaml:4.0.0'
     compileOnly "net.skinsrestorer:skinsrestorer-api:15.5.2"
+    implementation("net.dv8tion:JDA:5.3.0") {
+        exclude module: "opus-java"
+    }
 }
 
 def targetJavaVersion = 21

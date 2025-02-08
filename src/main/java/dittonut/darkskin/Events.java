@@ -20,9 +20,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -39,6 +42,10 @@ import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.util.Vector;
 
 public class Events implements Listener {
+    @EventHandler
+    public void onFirework(PlayerInteractEvent e) {
+        if (e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET && )
+    }
 
 // 우리 귀여운 더티가 해줄거야
 //    @EventHandler
@@ -71,6 +78,10 @@ public class Events implements Listener {
 //    }
 
     private static final double MAX_DISTANCE_SQUARED = 25.0d;
+    @EventHandler
+    public void onVillager(VillagerReplenishTradeEvent e) {
+
+    }
 
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
@@ -129,7 +140,10 @@ public class Events implements Listener {
     public void onUseContainer(InventoryOpenEvent e) {
         if (e.getInventory() instanceof EnchantingInventory) {
             e.setCancelled(true);
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+                    () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
+        } else if () {
+
         } else if (e.getView().title().equals(Component.text("DebugChest")) && e.getPlayer().isOp()) {
             e.setCancelled(true);
             Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
