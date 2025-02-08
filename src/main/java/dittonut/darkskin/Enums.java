@@ -21,9 +21,9 @@ public class Enums {
     public static int ENCHANT_ADD_CHANCE = 10; // 1/n
     public static Component STARDUST_NAME = mm.deserialize("<gold>별가루");
     public static Material FILLER_ITEM = Material.GRAY_STAINED_GLASS_PANE;
-  public static Component STARPIECE_NAME = mm.deserialize("<purple>별조각");
+  public static Component STARPIECE_NAME = mm.deserialize("<light_purple>별조각");
   public static int FILLER_MODEL = 1013145;
-  public static Component OBSI_POTION_NAME = mm.deserialize("<purple>흑요석 물약");
+  public static Component OBSI_POTION_NAME = mm.deserialize("<light_purple>흑요석 물약");
 
     public static ItemStack getStardust() {
         ItemStack item = new ItemStack(Material.GLOWSTONE_DUST);
