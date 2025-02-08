@@ -64,5 +64,12 @@ tasks {
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.
         minecraftVersion("1.20.1")
+        jvmArgs("-Dcom.mojang.eula.agree=true")
+
+        downloadPlugins {
+            modrinth "coordinateoffset", "4.0.8"
+            github "dmulloy2", "ProtocolLib", "5.3.0", "ProtocolLib.jar"
+            github "SkinsRestorer", "SkinsRestorer", "15.5.2", "SkinsRestorer.jar"
+        }
     }
 }

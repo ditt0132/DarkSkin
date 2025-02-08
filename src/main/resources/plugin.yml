@@ -2,4 +2,4 @@ name: DarkSkin
 version: '1.0-SNAPSHOT'
 main: dittonut.darkskin.DarkSkin
 api-version: '1.20'
-depend: [ ProtocolLib, SkinsRestorer, CoordinareOffset ]
+depend: [ ProtocolLib, SkinsRestorer, CoordinateOffset ]

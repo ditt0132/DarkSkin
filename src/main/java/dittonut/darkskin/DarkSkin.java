@@ -33,7 +33,7 @@ public class DarkSkin extends JavaPlugin {
         fireDamage = (Marker) Bukkit.getWorld("world").spawnEntity(new Location(Bukkit.getWorld("world"), 0d, 0d, 0d), EntityType.MARKER);
     fireDamage.customName(Component.text("지옥의 열기"));
         for (Team t : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
-            if (t.getName().startsWith("dt."))
+            if (!t.getName().startsWith("dt.")) return;
             if (Bukkit.getWorld("nether_"+t.getName()) != null) return;
             Bukkit.createWorld(new WorldCreator("nether_"+t.getName()).environment(World.Environment.NETHER).generatorSettings("NETHER"));
             t.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);

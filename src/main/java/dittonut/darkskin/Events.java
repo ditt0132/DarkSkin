@@ -33,7 +33,9 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
 
 public class Events implements Listener {
-  @EventHandler
+    private static final double MAX_DISTANCE_SQUARED = 25.0d;
+
+    @EventHandler
   public void onLoot(LootGenerateEvent e) {
     e.getLoot().replaceAll(i -> i.getType() == Material.ENCHANTED_BOOK ? PylonGUI.getDailyReward() : i); //If item is enchantedbook: set item to daily reward
   }
@@ -42,7 +44,8 @@ public class Events implements Listener {
   public void onPlace(BlockPlaceEvent e) {
     Location location = e.getBlockPlaced().getLocation();
     if (e.getBlockPlaced().getState() instanceof Sign && !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25)) {
-
+        e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
+        e.setCancelled(true);
     }
   }
 
@@ -54,17 +57,22 @@ public class Events implements Listener {
     }
   }
 
-  @EventHandler
-  public void onChat(AsyncChatEvent e) {
-        e.setCancelled(true);
-        e.getPlayer().getLocation().getNearbyPlayers(25).forEach(p -> {
-        p.sendMessage(mm.deserialize("<dark_green>[%.0f] <reset>"
-          .formatted(p.getLocation().distance(e.getPlayer().getLocation())))
-        //TODO: add name if needed
-        .append(e.message()));
-    });
-    e.viewers().removeIf(p -> )
-  }
+    @EventHandler
+    public void onChat(AsyncChatEvent event) {
+        Player sender = event.getPlayer();
+        event.viewers().removeIf(player ->
+                !((Player)player).getWorld().equals(sender.getWorld()) ||
+                        ((Player)player).getLocation().distanceSquared(sender.getLocation()) > MAX_DISTANCE_SQUARED
+        );
+
+        event.renderer((source, sourceDisplayName, message, viewer) -> {
+            double distance = ((Player)viewer).getLocation().distance(sender.getLocation());
+            Component prefix = mm.deserialize(String.format("<dark_green>[%dm]</dark_green> ", (int) distance));
+            return prefix.append(sender.displayName())
+                    .append(Component.text(": "))
+                    .append(message);
+        });
+    }
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
@@ -103,7 +111,7 @@ public class Events implements Listener {
         String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
         InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
         sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
-        
+        // FIXME: orElseThrow gets error
     }
 
   @EventHandler

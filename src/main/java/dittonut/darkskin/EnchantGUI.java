@@ -44,9 +44,10 @@ public class EnchantGUI {
     }
 
     public static void click(InventoryClickEvent e) {
-    if (!(e.getWhoClicked() instanceof Player p)) return;
+        if (!(e.getWhoClicked() instanceof Player p)) return;
         if (e.getSlot() == 26 && p.isOp()) {
             p.getInventory().addItem(Enums.getStardust());
+            e.setCancelled(true);
         }
         if (e.getCurrentItem() != null
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
@@ -55,8 +56,8 @@ public class EnchantGUI {
         }
         if (!e.isShiftClick() && e.getSlot() == 4
                 && e.getInventory().getItem(4) != null) {
-            enchant(p, e.getInventory().getItem(4));
             e.setCancelled(true);
+            enchant(p, e.getInventory().getItem(4));
         }
     }
 
@@ -64,38 +65,68 @@ public class EnchantGUI {
      * Enchants item.
      * Note: Stardust is consumed by this method
      *
-     * @param player the player trying to upgrade
+     * @param e the player trying to upgrade
      * @param item   the item trying to upgrade
      */
-  public static void enchant(HumanEntity e, ItemStack item) {
-    if (!(e instanceof Player p)) return;
-    if (!isEnchantable(item)) {
-      p.sendMessage(mm.deserialize("<red>인챈트가 불가능한 아이템이에요!"));
-      p.playNote(p.getLocation(), Instrument.DIDGERIDOO, Note.natural(1, Tone.F)); //TODO: 이거 소리 옆에서들리는지, NOTE: NonStandard
-      return;
-    };
-    if (!p.getInventory().containsAtLeast(Enums.getStardust(), 1)) {
-      p.sendMessage(mm.deserialize("<gold>별가루<red>가 부족해요!"));
-      p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5f, 0.86f);
-      return;
-    }
-    p.playSound(p.getLocation(), Sound.BLOCK_CHAIN_BREAK, 1.0f, 1.5f);
+    public static void enchant(HumanEntity e, ItemStack item) {
+        if (!(e instanceof Player p)) return;
+        if (!isEnchantable(item)) {
+            p.sendMessage(mm.deserialize("<red>인챈트가 불가능한 아이템이에요!"));
+            p.playNote(p.getLocation(), Instrument.DIDGERIDOO, Note.sharp(0, Tone.F)); //TODO: 이거 소리 옆에서들리는지, NOTE: NonStandard
+            return;
+        }
+        if (!p.getInventory().containsAtLeast(Enums.getStardust(), 1)) {
+            p.sendMessage(mm.deserialize("<gold>별가루<red>가 부족해요!"));
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5f, 0.86f);
+            return;
+        }
+        p.playSound(p.getLocation(), Sound.BLOCK_CHAIN_BREAK, 1.0f, 1.5f);
         p.getInventory().removeItem(Enums.getStardust());
-        Set<Enchantment> enchs = item.getEnchantments().keySet();
-        int size = enchs.size();
-        
-        if ((r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0 || size == 0) && size < Enums.MAX_ENCHANTMENTS) size++;
-        Map<Enchantment, Integer> added = new HashMap<>();
-        item.getEnchantments().forEach((ench, lvl) -> item.removeEnchantment(ench));
-      for (int i = 0; i < size; i++) {
-            if (enchs.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0) added.put(Enchantment.BINDING_CURSE, 1);
-        else if (enchs.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0) added.put(Enchantment.VANISHING_CURSE, 1);
-      else {
-        Enchantment re = randomEnchant(added.keySet());
-        added.put(re, RandomUtils.nextInt(1, re.getMaxLevel()));
-      }
+
+        Set<Enchantment> current = item.getEnchantments().keySet();
+        Map<Enchantment, Integer> changed = new HashMap<>();
+        int count = current.size();
+
+        item.getEnchantments().forEach((enchantment, integer) -> {
+            item.removeEnchantment(enchantment);
+        });
+
+        if (count == 0 || r.nextInt(1000) == 0) {
+            System.out.println("add");
+            count++;
+        };
+
+        for (int i = 0; i < count; i++) {
+            if (current.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0) {
+                changed.put(Enchantment.BINDING_CURSE, 1);
+                return;
+            } else if (current.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0) {
+                changed.put(Enchantment.VANISHING_CURSE, 1);
+                return;
+            }
+            Enchantment rand = randomEnchant(changed.keySet());
+            changed.put(rand, r.nextInt(rand.getMaxLevel()) + 1);
+        }
+
+        item.addUnsafeEnchantments(changed);
+
+//        Set<Enchantment> enchs = item.getEnchantments().keySet();
+//        int size = enchs.size();
+//
+//        if (size == 0 || (r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0) && size < Enums.MAX_ENCHANTMENTS) size++;
+//        Map<Enchantment, Integer> added = new HashMap<>();
+//        item.getEnchantments().forEach((ench, lvl) -> item.removeEnchantment(ench));
+//        for (int i = 0; i < size; i++) {
+//            if (enchs.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0)
+//                added.put(Enchantment.BINDING_CURSE, 1);
+//            else if (enchs.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0)
+//                added.put(Enchantment.VANISHING_CURSE, 1);
+//            else {
+//                Enchantment re = randomEnchant(added.keySet());
+//                added.put(re, RandomUtils.nextInt(1, re.getMaxLevel()));
+//            }
+//        }
     }
-  }
 
     private static boolean isEnchantable(ItemStack stack) {
         return Arrays.stream(Enchantment.values())
@@ -105,7 +136,9 @@ public class EnchantGUI {
     private static @NotNull Enchantment randomEnchant(Set<Enchantment> filtered) {
         List<Enchantment> enchantments =
                 Arrays.stream(Enchantment.values())
-                        .filter(e -> filtered.contains(e)).toList();
-        return enchantments.get(r.nextInt(enchantments.size())); //enchantments.isEmpty() ? null : CODE
+                        .filter(e -> !filtered.contains(e)).toList();
+        Enchantment out = enchantments.isEmpty() ? Enchantment.DURABILITY : enchantments.get(r.nextInt(enchantments.size()));
+        System.out.println(out);
+        return out;
     }
 }

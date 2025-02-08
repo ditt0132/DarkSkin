@@ -65,7 +65,7 @@
 강화/인챈 밸패-?
 좌표숨기기-테 (reducedDebugInfo만으로 안되는거아시져?)
 ㄴreducedDebugInfo-테
-ㄴCoordinateOffset depend-테 id맞는지
+ㄴCoordinateOffset depend-테
 인겜 채팅 끄기+보이스모드/로컬챗-협의필요
 ㄴ노마이크를위해 로컬챗을!-25m-Async관련 문제 해결필요
 ㄴ표지판금지-0,0 +-50에 예외적허용?
