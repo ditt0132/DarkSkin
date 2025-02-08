@@ -91,18 +91,20 @@ public class EnchantGUI {
             item.removeEnchantment(enchantment);
         });
 
-        if (count == 0 || r.nextInt(1000) == 0) {
-            System.out.println("add");
+        if (count < Enums.MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0)) {
             count++;
+            System.out.println(count);
         };
 
         for (int i = 0; i < count; i++) {
-            if (current.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0) {
+            if ((current.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0)
+                    && !changed.containsKey(Enchantment.BINDING_CURSE)) {
                 changed.put(Enchantment.BINDING_CURSE, 1);
-                return;
-            } else if (current.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0) {
+                continue;
+            } else if ((current.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0)
+                    && !changed.containsKey(Enchantment.VANISHING_CURSE)) {
                 changed.put(Enchantment.VANISHING_CURSE, 1);
-                return;
+                continue;
             }
             Enchantment rand = randomEnchant(changed.keySet());
             changed.put(rand, r.nextInt(rand.getMaxLevel()) + 1);
@@ -137,8 +139,6 @@ public class EnchantGUI {
         List<Enchantment> enchantments =
                 Arrays.stream(Enchantment.values())
                         .filter(e -> !filtered.contains(e)).toList();
-        Enchantment out = enchantments.isEmpty() ? Enchantment.DURABILITY : enchantments.get(r.nextInt(enchantments.size()));
-        System.out.println(out);
-        return out;
+        return enchantments.isEmpty() ? Enchantment.DURABILITY : enchantments.get(r.nextInt(enchantments.size()));
     }
 }
