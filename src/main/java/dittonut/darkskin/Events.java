@@ -5,6 +5,7 @@ import static dittonut.darkskin.DarkSkin.sr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Bukkit;
@@ -30,6 +31,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.world.LootGenerateEvent;
+import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -39,12 +41,27 @@ import net.kyori.adventure.text.Component;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
 public class Events implements Listener {
     @EventHandler
     public void onFirework(PlayerInteractEvent e) {
-        if (e.getItem() != null && e.getItem().getType() == Material.FIREWORK_ROCKET && )
+        if (e.getItem() == null) return;
+        if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
+        PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
+        if (!pdc.has(Enums.PDC_KEY, PersistentDataType.STRING)
+                || !(pdc.get(Enums.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
+        AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
+
+        e.getPlayer().getLocation().getNearbyPlayers(8).stream()
+                .filter(p -> !p.equals(e.getPlayer())) // 자기 제외
+                .filter(p -> Family.getTeam(p).equals(Family.getTeam(e.getPlayer()))) // 같은 팀만
+                .forEach(p -> {
+                    lastPlayer.get().addPassenger(p);
+                    lastPlayer.set(p);
+                });
     }
 
 // 우리 귀여운 더티가 해줄거야
@@ -142,8 +159,10 @@ public class Events implements Listener {
             e.setCancelled(true);
             Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
                     () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
-        } else if () {
-
+        } else if (e.getInventory() instanceof BeaconInventory) {
+            e.setCancelled(true);
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+                    () -> e.getPlayer().openInventory(PylonGUI.getInventory((Player) e.getPlayer())));
         } else if (e.getView().title().equals(Component.text("DebugChest")) && e.getPlayer().isOp()) {
             e.setCancelled(true);
             Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
@@ -151,6 +170,7 @@ public class Events implements Listener {
             i.add(Enums.getStardust());
             i.add(Enums.getObsipotion());
             i.add(Enums.getStarpiece());
+            i.add(Enums.getFirework());
             inv.addItem(i.toArray(new ItemStack[0]));
             Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
         }

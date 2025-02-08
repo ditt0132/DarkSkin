@@ -35,7 +35,7 @@ public class DarkSkin extends JavaPlugin {
         for (Team t : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
             if (!t.getName().startsWith("dt.")) return;
             if (Bukkit.getWorld("nether_" + t.getName()) != null) return;
-            Bukkit.createWorld(new WorldCreator("nether_" + t.getName()).environment(World.Environment.NETHER).generatorSettings("NETHER"));
+            Bukkit.createWorld(new WorldCreator("nether_" + t.getName()).environment(World.Environment.NETHER).generator("minecraft:nether"));
             t.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
         }
         sr = SkinsRestorerProvider.get();

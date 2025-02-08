@@ -14,7 +14,7 @@ public class Family {
   public static Team getTeam(UUID id) {
     return Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(id));
   }
-public static Team getTeam(Player p) {
-    return getTeam(p);
+  public static Team getTeam(Player p) {
+    return getTeam(p.getUniqueId());
   }
 }
