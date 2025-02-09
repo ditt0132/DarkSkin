@@ -56,7 +56,7 @@ public class PylonGUI {
     }
 
     public static Inventory getInventory(Player p) {
-        Inventory inv = Bukkit.createInventory(p, 27, Enums.ENCHANT_GUI_TITLE);
+        Inventory inv = Bukkit.createInventory(p, 27, Enums.PYLON_GUI_TITLE);
         ItemStack item = new ItemStack(Enums.FILLER_ITEM);
         ItemMeta meta = item.getItemMeta();
         meta.setCustomModelData(Enums.FILLER_MODEL);
