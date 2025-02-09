@@ -26,10 +26,7 @@ import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.EnchantingInventory;
@@ -62,6 +59,12 @@ public class Events implements Listener {
                     lastPlayer.get().addPassenger(p);
                     lastPlayer.set(p);
                 });
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().getType() == Material.AIR) return;
+        // add players to delayed(1m) with player that landed together (loop nearby 8b, only teams)
     }
 
 // 우리 귀여운 더티가 해줄거야

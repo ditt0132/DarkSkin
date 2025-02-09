@@ -31,7 +31,7 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
   }
 
   //see main class, called every 5 sec
-  public static void applyEffects() { //TODO: 언젠가 pid에서 teamname으로. 최대 비컨 관리 힘드러짐;;
+  public static void applyEffects() { // pid는 팀장의 UUID라는거 잊지말기!
     Variables.beacons.forEach((pid, pair) -> {
       pair.getLeft().getNearbyPlayers(pair.getRight()).forEach(p -> {
         if (Family.getTeam(p).getName().equals(Family.getTeam(pid).getName())) p.addPotionEffects(teamEffects);
