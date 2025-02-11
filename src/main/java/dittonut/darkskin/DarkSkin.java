@@ -18,7 +18,6 @@ import net.skinsrestorer.api.SkinsRestorerProvider;
 
 public class DarkSkin extends JavaPlugin {
     public static final MiniMessage mm = MiniMessage.miniMessage();
-    public static Marker fireDamage;
     public static DarkSkin instance;
     public static ProtocolManager pm;
     public static SkinsRestorer sr;
@@ -30,8 +29,6 @@ public class DarkSkin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        fireDamage = (Marker) Bukkit.getWorld("world").spawnEntity(new Location(Bukkit.getWorld("world"), 0d, 0d, 0d), EntityType.MARKER);
-        fireDamage.customName(Component.text("지옥의 열기"));
         for (Team t : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
             if (!t.getName().startsWith("dt.")) return;
             if (Bukkit.getWorld("nether_" + t.getName()) != null) return;
@@ -45,13 +42,14 @@ public class DarkSkin extends JavaPlugin {
             world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         }
         Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.getOnlinePlayers().forEach(p -> {
-            if (!Variables.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
+            if (!Enums.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
                 p.sendMessage(mm.deserialize("<red>금지된 아이템을 소지 중이에요! (ELYTRA)"));
                 getLogger().info("[BanItem] %s have ELYTRA!".formatted(p.getName()));
                 p.getInventory().remove(Material.ELYTRA);
             }
         }), 0L, 1200L);
         Bukkit.getScheduler().runTaskTimer(this, Pylon::updateBeacon, 0L, 1200L); //1분마다 신호기를 업데이트해요!
+        Bukkit.getScheduler().runTaskTimer(this, Pylon::applyEffects, 0L, 100L); //5초마다 신호기 효과 적용!
         Bukkit.getScheduler().runTaskTimer(this, () -> {
 
         }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
