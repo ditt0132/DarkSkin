@@ -21,20 +21,23 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
 );
   // see main class, called every 1min
   public static void updateBeacon() {
-    Variables.beacons.forEach((pid, pair) -> {
-      if (!(pair.getLeft().getBlock() instanceof Beacon b)) { //혹시 몰라요 blockBreakEvent가 일 안할지
-        Variables.beacons.put(pid, null); return;
+    Enums.beacons.forEach((pid, loc) -> {
+      if (!(loc.getBlock() instanceof Beacon b)) { //혹시 몰라요 blockBreakEvent가 일 안할지
+        Enums.beacons.put(pid, null); return;
       }
-      // todo: check pyramid level
-      // update its range
+      // todo: make beacon ranges chunk load. do it as updates
     });
   }
 
   //see main class, called every 5 sec
   public static void applyEffects() { // pid는 팀장의 UUID라는거 잊지말기!
-    Variables.beacons.forEach((pid, pair) -> {
-      pair.getLeft().getNearbyPlayers(pair.getRight()).forEach(p -> {
-        if (Family.getTeam(p).getName().equals(Family.getTeam(pid).getName())) p.addPotionEffects(teamEffects);
+    Enums.beacons.forEach((pid, loc) -> {
+      if (!(loc.getBlock().getState() instanceof Beacon b)) { //
+        Enums.beacons.put(pid, null); //위에 이미 같은 로직이 있긴 해도 해두면 좋으니까요
+        return;
+      }
+      loc.getNearbyPlayers(b.getEffectRange()).forEach(p -> {
+        if (FamilyUtil.getTeam(p).getName().equals(FamilyUtil.getTeam(pid).getName())) p.addPotionEffects(teamEffects);
         else p.addPotionEffects(enemyEffects);
       });
     });
