@@ -7,21 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
+import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -40,7 +37,6 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.Vector;
 
 public class Events implements Listener {
     @EventHandler
@@ -54,7 +50,7 @@ public class Events implements Listener {
 
         e.getPlayer().getLocation().getNearbyPlayers(8).stream()
                 .filter(p -> !p.equals(e.getPlayer())) // 자기 제외
-                .filter(p -> Family.getTeam(p).equals(Family.getTeam(e.getPlayer()))) // 같은 팀만
+                .filter(p -> FamilyUtil.getTeam(p).equals(FamilyUtil.getTeam(e.getPlayer()))) // 같은 팀만
                 .forEach(p -> {
                     lastPlayer.get().addPassenger(p);
                     lastPlayer.set(p);
@@ -201,7 +197,7 @@ public class Events implements Listener {
     public void onPortal(PlayerPortalEvent e) {
         if (!e.getTo().getWorld().getName().equals("nether")) return;
         Location loc = e.getTo().clone();
-        loc.setWorld(Bukkit.getWorld("nether_" + Family.getTeam(e.getPlayer()).getName().substring(3)));
+        loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
         e.setTo(loc);
     }
 

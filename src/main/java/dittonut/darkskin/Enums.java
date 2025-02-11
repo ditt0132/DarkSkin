@@ -18,6 +18,9 @@ import java.util.*;
 
 public class Enums {
     // this does not include riders, only the elytra one
+
+    /** no save */
+    public static boolean enableEnd = false;
     public static Set<UUID> patrolers = new HashSet<>();
     public static Set<UUID> rewarded = new HashSet<>();
     // TODO HUGE REFACTOR, the UUID says the team owner's
