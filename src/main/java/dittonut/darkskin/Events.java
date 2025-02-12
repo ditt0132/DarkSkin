@@ -5,6 +5,7 @@ import static dittonut.darkskin.DarkSkin.sr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.bukkit.Bukkit;
@@ -121,10 +122,21 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onKill(EntityDeathEvent e) {
+    public void onDeath(EntityDeathEvent e) {
         if (e.getEntityType() == EntityType.WARDEN) {
             e.getDrops().clear();
             e.getDrops().add(Enums.getObsipotion());
+        } else if (e.getEntityType() == EntityType.ENDER_DRAGON) {
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
+                Bukkit.getWorld("world_the_end").sendMessage(mm.deserialize("드래곤이 죽었어요. 엔드 차원이 10분 뒤에 닫혀요!"));
+                Bukkit.getWorld("world_the_end").getPlayers().forEach(p -> {
+                    // 죽을 시 침대 또는 파일런 또는 월드 스폰으로 이동
+                    Location home = p.getBedSpawnLocation();
+                    if (home == null) home = Pylon.pylonLocationOf(p);
+                    if (home == null) home = Bukkit.getWorld("world").getSpawnLocation();
+                    p.teleport(home);
+                });
+            });
         }
     }
 

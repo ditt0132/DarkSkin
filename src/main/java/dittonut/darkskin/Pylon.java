@@ -3,9 +3,12 @@ package dittonut.darkskin;
 import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Beacon;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.Nullable;
 
 public class Pylon {
   
@@ -41,5 +44,9 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
         else p.addPotionEffects(enemyEffects);
       });
     });
+  }
+
+  public static @Nullable Location pylonLocationOf(OfflinePlayer p) {
+    return Enums.beacons.get(FamilyUtil.getOwnerByMember(p).getUniqueId());
   }
 }
