@@ -29,18 +29,24 @@ public class DarkSkin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        sr = SkinsRestorerProvider.get();
+        pm = ProtocolLibrary.getProtocolManager();
+
+        Bukkit.getPluginCommand("close-end").setExecutor(new Commands());
+        Bukkit.getPluginCommand("open-end").setExecutor(new Commands());
+        Bukkit.getPluginManager().registerEvents(new Events(), this);
+
         for (Team t : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
             if (!t.getName().startsWith("dt.")) return;
             if (Bukkit.getWorld("nether_" + t.getName()) != null) return;
             Bukkit.createWorld(new WorldCreator("nether_" + t.getName()).environment(World.Environment.NETHER).generator("minecraft:nether"));
             t.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
         }
-        sr = SkinsRestorerProvider.get();
-        pm = ProtocolLibrary.getProtocolManager();
-        Bukkit.getPluginManager().registerEvents(new Events(), this);
+
         for (World world : Bukkit.getWorlds()) {
             world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         }
+
         Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.getOnlinePlayers().forEach(p -> {
             if (!Enums.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
                 p.sendMessage(mm.deserialize("<red>금지된 아이템을 소지 중이에요! (ELYTRA)"));
@@ -48,16 +54,21 @@ public class DarkSkin extends JavaPlugin {
                 p.getInventory().remove(Material.ELYTRA);
             }
         }), 0L, 1200L);
+
         Bukkit.getScheduler().runTaskTimer(this, Pylon::updateBeacon, 0L, 1200L); //1분마다 신호기를 업데이트해요!
         Bukkit.getScheduler().runTaskTimer(this, Pylon::applyEffects, 0L, 100L); //5초마다 신호기 효과 적용!
         Bukkit.getScheduler().runTaskTimer(this, () -> {
-
+            Enums.rewarded.clear();
+            Bukkit.broadcast(mm.deserialize("일일 보상이 리셋됐어요!"));
         }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
+
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             Bukkit.getOnlinePlayers().stream()
                     .filter(p -> p.getWorld().getEnvironment() == Environment.NETHER)
                     .forEach(p -> p.setFireTicks(20));
         }, 0L, 20L);
+
+
         getLogger().info("Enabled!");
     }
 
