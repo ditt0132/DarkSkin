@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.papermc.paper.event.player.PlayerTradeEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,6 +26,7 @@ import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.BeaconInventory;
@@ -95,14 +97,17 @@ public class Events implements Listener {
 //        }); //
 //    }
 
-  private static final double MAX_DISTANCE_SQUARED = 25.0d;
+  private static final double MAX_DISTANCE_SQUARED = 25.0d * 25.0d;
 
   @EventHandler
-  public void onVillager(VillagerReplenishTradeEvent e) {
-
+  public void onVillager(PlayerTradeEvent e) {
+    if (e.getTrade().getResult().getType() == Material.ENCHANTED_BOOK) {
+      e.setCancelled(true);
+      e.getPlayer().sendMessage(mm.deserialize("<red>금지된 거래예요! [ENCHANTED_BOOK]"));
+    }
   }
 
-  @EventHandler
+                         @EventHandler
   public void onBreak(BlockBreakEvent e) {
     if (e.getBlock().getType().name().contains("ORE")) {
       e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
@@ -148,6 +153,7 @@ public class Events implements Listener {
       });
     }
   }
+
 
   @EventHandler
   public void onChat(AsyncChatEvent event) {
