@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EntityType;
@@ -40,29 +41,29 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class Events implements Listener {
-    @EventHandler
-    public void onFirework(PlayerInteractEvent e) {
-        if (e.getItem() == null) return;
-        if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
-        PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
-        if (!pdc.has(Enums.PDC_KEY, PersistentDataType.STRING)
-                || !(pdc.get(Enums.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
-        AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
+  @EventHandler
+  public void onFirework(PlayerInteractEvent e) {
+    if (e.getItem() == null) return;
+    if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
+    PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
+    if (!pdc.has(Enums.PDC_KEY, PersistentDataType.STRING)
+      || !(pdc.get(Enums.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
+    AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
 
-        e.getPlayer().getLocation().getNearbyPlayers(8).stream()
-                .filter(p -> !p.equals(e.getPlayer())) // 자기 제외
-                .filter(p -> FamilyUtil.getTeam(p).equals(FamilyUtil.getTeam(e.getPlayer()))) // 같은 팀만
-                .forEach(p -> {
-                    lastPlayer.get().addPassenger(p);
-                    lastPlayer.set(p);
-                });
-    }
+    e.getPlayer().getLocation().getNearbyPlayers(8).stream()
+      .filter(p -> !p.equals(e.getPlayer())) // 자기 제외
+      .filter(p -> FamilyUtil.getTeam(p).equals(FamilyUtil.getTeam(e.getPlayer()))) // 같은 팀만
+      .forEach(p -> {
+        lastPlayer.get().addPassenger(p);
+        lastPlayer.set(p);
+      });
+  }
 
-    @EventHandler
-    public void onMove(PlayerMoveEvent e) {
-        if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().getType() == Material.AIR) return;
-        // add players to delayed(1m) with player that landed together (loop nearby 8b, only teams)
-    }
+  @EventHandler
+  public void onMove(PlayerMoveEvent e) {
+    if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().getType() == Material.AIR) return;
+    // add players to delayed(1m) with player that landed together (loop nearby 8b, only teams)
+  }
 
 // 우리 귀여운 더티가 해줄거야
 //    @EventHandler
@@ -94,123 +95,134 @@ public class Events implements Listener {
 //        }); //
 //    }
 
-    private static final double MAX_DISTANCE_SQUARED = 25.0d;
-    @EventHandler
-    public void onVillager(VillagerReplenishTradeEvent e) {
+  private static final double MAX_DISTANCE_SQUARED = 25.0d;
 
+  @EventHandler
+  public void onVillager(VillagerReplenishTradeEvent e) {
+
+  }
+
+  @EventHandler
+  public void onBreak(BlockBreakEvent e) {
+    if (e.getBlock().getType().name().contains("ORE")) {
+      e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
     }
+  }
 
-    @EventHandler
-    public void onBreak(BlockBreakEvent e) {
-        if (e.getBlock().getType().name().contains("ORE")) {
-            e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
-        }
+  @EventHandler
+  public void onLoot(LootGenerateEvent e) {
+    e.getLoot().replaceAll(i -> i.getType() == Material.ENCHANTED_BOOK ? PylonGUI.getDailyReward() : i); //If item is enchantedbook: set item to daily reward
+  }
+
+  @EventHandler
+  public void onPlace(BlockPlaceEvent e) {
+    Location location = e.getBlockPlaced().getLocation();
+    if (e.getBlockPlaced().getState() instanceof Sign && !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25)) {
+      e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
+      e.setCancelled(true);
     }
+  }
 
-    @EventHandler
-    public void onLoot(LootGenerateEvent e) {
-        e.getLoot().replaceAll(i -> i.getType() == Material.ENCHANTED_BOOK ? PylonGUI.getDailyReward() : i); //If item is enchantedbook: set item to daily reward
-    }
+  @EventHandler
+  public void onDeath(EntityDeathEvent e) {
+    if (e.getEntityType() == EntityType.WARDEN) {
+      e.getDrops().clear();
+      e.getDrops().add(Enums.getObsipotion());
+    } else if (e.getEntityType() == EntityType.ENDER_DRAGON) {
+      World end = Bukkit.getWorld("world_the_end");
+      World overworld = Bukkit.getWorld("world");
+      if (end == null || overworld == null)
+        throw new IllegalStateException("World 'world_the_end' or 'world' is null!");
+      end.sendMessage(mm.deserialize("드래곤이 죽었어요. 엔드 차원이 10분 뒤에 닫혀요!"));
+      // 보상 뿌리기
 
-    @EventHandler
-    public void onPlace(BlockPlaceEvent e) {
-        Location location = e.getBlockPlaced().getLocation();
-        if (e.getBlockPlaced().getState() instanceof Sign && !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25)) {
-            e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onDeath(EntityDeathEvent e) {
-        if (e.getEntityType() == EntityType.WARDEN) {
-            e.getDrops().clear();
-            e.getDrops().add(Enums.getObsipotion());
-        } else if (e.getEntityType() == EntityType.ENDER_DRAGON) {
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
-                Bukkit.getWorld("world_the_end").sendMessage(mm.deserialize("드래곤이 죽었어요. 엔드 차원이 10분 뒤에 닫혀요!"));
-                Bukkit.getWorld("world_the_end").getPlayers().forEach(p -> {
-                    // 죽을 시 침대 또는 파일런 또는 월드 스폰으로 이동
-                    Location home = p.getBedSpawnLocation();
-                    if (home == null) home = Pylon.pylonLocationOf(p);
-                    if (home == null) home = Bukkit.getWorld("world").getSpawnLocation();
-                    p.teleport(home);
-                });
-            });
-        }
-    }
-
-    @EventHandler
-    public void onChat(AsyncChatEvent event) {
-        Player sender = event.getPlayer();
-        event.viewers().removeIf(player ->
-                !((Player) player).getWorld().equals(sender.getWorld()) ||
-                        ((Player) player).getLocation().distanceSquared(sender.getLocation()) > MAX_DISTANCE_SQUARED
-        );
-
-        event.renderer((source, sourceDisplayName, message, viewer) -> {
-            double distance = ((Player) viewer).getLocation().distance(sender.getLocation());
-            Component prefix = mm.deserialize(String.format("<dark_green>[%dm]</dark_green> ", (int) distance));
-            return prefix.append(sender.displayName())
-                    .append(Component.text(": "))
-                    .append(message);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
+        end.getPlayers().forEach(p -> {
+          // 죽을 시 침대 또는 파일런 또는 월드 스폰으로 이동
+          Location home = p.getBedSpawnLocation();
+          if (home == null) home = Pylon.pylonLocationOf(p);
+          if (home == null) home = overworld.getSpawnLocation();
+          p.teleport(home);
         });
+        //
+      });
     }
+  }
 
-    @EventHandler
-    public void onClick(InventoryClickEvent e) {
-        if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
-            EnchantGUI.click(e);
-        }
-    }
+  @EventHandler
+  public void onChat(AsyncChatEvent event) {
+    Player sender = event.getPlayer();
+    event.viewers().removeIf(audience -> {
+        if (!(audience instanceof Player player)) return false;
+        return !player.getWorld().equals(sender.getWorld()) ||
+          player.getLocation().distanceSquared(sender.getLocation()) > MAX_DISTANCE_SQUARED;
+      }
+    );
 
-    @EventHandler
-    public void onUseContainer(InventoryOpenEvent e) {
-        if (e.getInventory() instanceof EnchantingInventory) {
-            e.setCancelled(true);
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
-                    () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
-        } else if (e.getInventory() instanceof BeaconInventory) {
-            e.setCancelled(true);
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
-                    () -> e.getPlayer().openInventory(PylonGUI.getInventory((Player) e.getPlayer())));
-        } else if (e.getView().title().equals(Component.text("DebugChest")) && e.getPlayer().isOp()) {
-            e.setCancelled(true);
-            Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
-            List<ItemStack> i = new ArrayList<>();
-            i.add(Enums.getStardust());
-            i.add(Enums.getObsipotion());
-            i.add(Enums.getStarpiece());
-            i.add(Enums.getFirework());
-            inv.addItem(i.toArray(new ItemStack[0]));
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
-        }
-    }
+    event.renderer((source, sourceDisplayName, message, viewer) -> {
+      if (!(viewer instanceof Player player)) return message;
+      double distance = player.getLocation().distance(sender.getLocation());
+      Component prefix = mm.deserialize(String.format("<dark_green>[%dm]</dark_green> ", (int) distance));
+      return prefix.append(sender.displayName())
+        .append(Component.text(": "))
+        .append(message);
+    });
+  }
 
-    @EventHandler
-    public void onCloseContainer(InventoryCloseEvent e) {
-        if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
-            ItemStack stack = e.getInventory().getItem(4);
-            if (stack == null) return;
-            e.getPlayer().getInventory().addItem(stack).forEach((i, item) ->
-                    e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), item));
-        }
+  @EventHandler
+  public void onClick(InventoryClickEvent e) {
+    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
+      EnchantGUI.click(e);
     }
+  }
 
-    @EventHandler
-    public void onJoin(PlayerJoinEvent e) throws MineSkinException, DataRequestException {
-        String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
-        InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
-        sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
-        // FIXME: orElseThrow gets error
+  @EventHandler
+  public void onUseContainer(InventoryOpenEvent e) {
+    if (e.getInventory() instanceof EnchantingInventory) {
+      e.setCancelled(true);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+        () -> e.getPlayer().openInventory(EnchantGUI.getInventory((Player) e.getPlayer())));
+    } else if (e.getInventory() instanceof BeaconInventory) {
+      e.setCancelled(true);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+        () -> e.getPlayer().openInventory(PylonGUI.getInventory((Player) e.getPlayer())));
+    } else if (e.getView().title().equals(Component.text("DebugChest")) && e.getPlayer().isOp()) {
+      e.setCancelled(true);
+      Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
+      List<ItemStack> i = new ArrayList<>();
+      i.add(Enums.getStardust());
+      i.add(Enums.getObsipotion());
+      i.add(Enums.getStarpiece());
+      i.add(Enums.getFirework());
+      inv.addItem(i.toArray(new ItemStack[0]));
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
     }
+  }
 
-    @EventHandler
-    public void onPortal(PlayerPortalEvent e) {
-        if (!e.getTo().getWorld().getName().equals("nether")) return;
-        Location loc = e.getTo().clone();
-        loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
-        e.setTo(loc);
+  @EventHandler
+  public void onCloseContainer(InventoryCloseEvent e) {
+    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
+      ItemStack stack = e.getInventory().getItem(4);
+      if (stack == null) return;
+      e.getPlayer().getInventory().addItem(stack).forEach((i, item) ->
+        e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), item));
     }
+  }
+
+  @EventHandler
+  public void onJoin(PlayerJoinEvent e) throws MineSkinException, DataRequestException {
+    String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
+    InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
+    sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
+    // FIXME: orElseThrow gets error
+  }
+
+  @EventHandler
+  public void onPortal(PlayerPortalEvent e) {
+    if (!e.getTo().getWorld().getName().equals("nether")) return;
+    Location loc = e.getTo().clone();
+    loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
+    e.setTo(loc);
+  }
 
 }

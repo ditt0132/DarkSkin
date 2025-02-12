@@ -93,7 +93,6 @@ public class EnchantGUI {
 
         if (count < Enums.MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0)) {
             count++;
-            System.out.println(count);
         };
 
         for (int i = 0; i < count; i++) {
