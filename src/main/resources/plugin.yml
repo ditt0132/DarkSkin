@@ -3,3 +3,14 @@ version: '1.0-SNAPSHOT'
 main: dittonut.darkskin.DarkSkin
 api-version: '1.20'
 depend: [ ProtocolLib, SkinsRestorer, CoordinateOffset ]
+commands:
+  open-end:
+    permission: darkskin.endmanager
+    usage: /open-end
+  close-end:
+    permission: darkskin.endmanager
+    usage: /close-end
+permissions:
+  darkskin.endmanager:
+    default: op
+    description: Ability to open end and close end
