@@ -41,6 +41,8 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.Nullable;
 
 public class Events implements Listener {
   @EventHandler
@@ -107,7 +109,7 @@ public class Events implements Listener {
     }
   }
 
-                         @EventHandler
+  @EventHandler
   public void onBreak(BlockBreakEvent e) {
     if (e.getBlock().getType().name().contains("ORE")) {
       e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
@@ -177,9 +179,8 @@ public class Events implements Listener {
 
   @EventHandler
   public void onClick(InventoryClickEvent e) {
-    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
-      EnchantGUI.click(e);
-    }
+    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
+    else if (e.getView().title().equals(Enums.EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
   }
 
   @EventHandler
@@ -202,6 +203,10 @@ public class Events implements Listener {
       i.add(Enums.getFirework());
       inv.addItem(i.toArray(new ItemStack[0]));
       Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
+    } else if (e.getView().title().equals(Component.text("더티더티더티더티")) && e.getPlayer().isOp()) {
+      e.setCancelled(true);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+        ()-> e.getPlayer().openInventory(ExpShopGUI.getInventory((Player) e.getPlayer())));
     }
   }
 
@@ -217,10 +222,12 @@ public class Events implements Listener {
 
   @EventHandler
   public void onJoin(PlayerJoinEvent e) throws MineSkinException, DataRequestException {
-    String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
+    Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream()
+      .filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElse(null);
+    if (team == null) return;
+    String teamOwner = team.getName().substring(3);
     InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
     sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
-    // FIXME: orElseThrow gets error
   }
 
   @EventHandler

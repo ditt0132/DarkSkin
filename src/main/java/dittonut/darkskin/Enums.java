@@ -38,6 +38,7 @@ public class Enums {
     public static int ENCHANT_ADD_CHANCE = 10; // 1/n
     public static Component STARDUST_NAME = mm.deserialize("<gold>별가루");
     public static Material FILLER_ITEM = Material.GRAY_STAINED_GLASS_PANE;
+    public static Component EXPSHOP_GUI_TITLE = mm.deserialize("<#F40003><reset>더티귀여워!더티귀여워!더티귀여워!더티귀여워!더티귀여워!");
 
     // FIREWORK - 정찰용 폭죽
     public static NamespacedKey PDC_KEY = new NamespacedKey("darkforest", "custom");
