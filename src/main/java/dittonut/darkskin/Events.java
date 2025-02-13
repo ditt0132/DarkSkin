@@ -215,8 +215,7 @@ public class Events implements Listener {
     if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
       ItemStack stack = e.getInventory().getItem(4);
       if (stack == null) return;
-      e.getPlayer().getInventory().addItem(stack).forEach((i, item) ->
-        e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), item));
+      Utils.addItem(e.getPlayer(), stack);
     }
   }
 
