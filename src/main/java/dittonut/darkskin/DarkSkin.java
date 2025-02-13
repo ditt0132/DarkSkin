@@ -13,11 +13,14 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 
+import java.io.IOException;
+
 public class DarkSkin extends JavaPlugin {
     public static final MiniMessage mm = MiniMessage.miniMessage();
     public static DarkSkin instance;
     public static ProtocolManager pm;
     public static SkinsRestorer sr;
+    private ConfigManager configManager;
 
     public static DarkSkin getInstance() {
         return instance;
@@ -28,6 +31,15 @@ public class DarkSkin extends JavaPlugin {
         instance = this;
         sr = SkinsRestorerProvider.get();
         pm = ProtocolLibrary.getProtocolManager();
+
+        try {
+            configManager = new ConfigManager(getDataFolder());
+        } catch (IOException e) {
+            getLogger().severe("설정 파일을 로드하는 중 오류 발생: " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        Config.load();
 
         Bukkit.getPluginCommand("close-end").setExecutor(new Commands());
         Bukkit.getPluginCommand("open-end").setExecutor(new Commands());
