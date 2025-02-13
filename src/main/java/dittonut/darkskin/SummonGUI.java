@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -27,10 +26,10 @@ public class SummonGUI {
         Inventory inv = Bukkit.createInventory(p, 27);
         for (int i = 0; i < 27; i++) {
             if (Set.of(10, 12, 14, 16).contains(i)) continue;
-            inv.setItem(i, Enums.getFiller());
+            inv.setItem(i, Config.getFiller());
         }
-        inv.setItem(10, shopItem(Enums.getStardust(), 40, 40));
-        inv.setItem(10, shopItem(Enums.getStarpiece(), 20, 40));
+        inv.setItem(10, shopItem(Config.getStardust(), 40, 40));
+        inv.setItem(10, shopItem(Config.getStarpiece(), 20, 40));
         inv.setItem(10, shopItem(new ItemStack(Material.TOTEM_OF_UNDYING), 2, 40));
         inv.setItem(10, shopItem(new ItemStack(Material.BEACON), 1, 100));
         return inv;

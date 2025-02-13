@@ -1,7 +1,5 @@
 package dittonut.darkskin;
 
-import static dittonut.darkskin.DarkSkin.mm;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -47,19 +45,19 @@ public class PylonGUI {
         if (RandomUtils.nextDouble(0.0, 1.0) < 0.65) { //65% 별가루
             if (RandomUtils.nextDouble(0.0, 1.0) < 0.5) amount++; //50%
             if (RandomUtils.nextDouble(0.0, 1.0) < 0.25) amount++; //25%
-            return Utils.withAmount(Enums.getStardust(), amount);
+            return Utils.withAmount(Config.getStardust(), amount);
         } else { //35% 별조각
             if (RandomUtils.nextDouble(0.0, 1.0) < 0.35) amount++; //35%
             if (RandomUtils.nextDouble(0.0, 1.0) < 0.15) amount++; //15%
-            return Utils.withAmount(Enums.getStarpiece(), amount);
+            return Utils.withAmount(Config.getStarpiece(), amount);
         }
     }
 
     public static Inventory getInventory(Player p) {
-        Inventory inv = Bukkit.createInventory(p, 27, Enums.PYLON_GUI_TITLE);
-        ItemStack item = new ItemStack(Enums.FILLER_ITEM);
+        Inventory inv = Bukkit.createInventory(p, 27, Config.PYLON_GUI_TITLE);
+        ItemStack item = new ItemStack(Config.FILLER_ITEM);
         ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(Enums.FILLER_MODEL);
+        meta.setCustomModelData(Config.FILLER_MODEL);
         meta.displayName(Component.text(""));
         item.setItemMeta(meta);
         for (int i = 0; i < inv.getSize(); i++) {
@@ -89,7 +87,7 @@ public class PylonGUI {
         if (!(e.getWhoClicked() instanceof Player p)) return;
         if (e.getCurrentItem() != null
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
-                && e.getCurrentItem().getItemMeta().getCustomModelData() == Enums.FILLER_MODEL) {
+                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.FILLER_MODEL) {
         } else if (e.getSlot() == 10) { //소환,부활,경험치상점,별조각 플탐보상
             //소헌 letsgo
             //Player selection required btw
@@ -138,10 +136,10 @@ public class PylonGUI {
      */
     public static void enchant(HumanEntity player, ItemStack item) {
         if (!isEnchantable(item)) return;
-        if (!player.getInventory().containsAtLeast(Enums.getStardust(), 1)) return;
-        player.getInventory().removeItem(Enums.getStardust());
+        if (!player.getInventory().containsAtLeast(Config.getStardust(), 1)) return;
+        player.getInventory().removeItem(Config.getStardust());
         int size = item.getEnchantments().size();
-        if ((RandomUtils.nextDouble(0.0, 1.0) < Enums.ENCHANT_ADD_CHANCE || size == 0) && size < Enums.MAX_ENCHANTMENTS)
+        if ((RandomUtils.nextDouble(0.0, 1.0) < Config.ENCHANT_ADD_CHANCE || size == 0) && size < Config.MAX_ENCHANTMENTS)
             size++;
         Set<Enchantment> added = new HashSet<>();
         item.getEnchantments().forEach((ench, lvl) -> item.removeEnchantment(ench));

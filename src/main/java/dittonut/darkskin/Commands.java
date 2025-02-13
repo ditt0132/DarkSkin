@@ -14,10 +14,10 @@ public class Commands implements CommandExecutor {
     if (!sender.isOp()) return true;
     if (label.equals("open-end")) {
       Bukkit.broadcast(mm.deserialize("[SYSTEM] 엔드 차원이 오픈되었어요!"));
-      Enums.enableEnd = true;
+      Config.enableEnd = true;
     } else if (label.equals("close-end")) {
       Bukkit.broadcast(mm.deserialize("[SYSTEM] 엔드 차원이 수동으로 닫혔어요!"));
-      Enums.enableEnd = false;
+      Config.enableEnd = false;
     }
     return true;
   }

@@ -47,20 +47,20 @@ public class ExpShopGUI {
   public static void click(InventoryClickEvent e) {
     if (!(e.getWhoClicked() instanceof Player p)) return;
     e.setCancelled(true);
-    if (e.getSlot() == 10) sell(p, Enums.getStardust(), 40, 40); //40렙-별가루40개
-    else if (e.getSlot() == 12) sell(p, Enums.getStarpiece(), 20, 40); //40렙-별조각20개
+    if (e.getSlot() == 10) sell(p, Config.getStardust(), 40, 40); //40렙-별가루40개
+    else if (e.getSlot() == 12) sell(p, Config.getStarpiece(), 20, 40); //40렙-별조각20개
     else if (e.getSlot() == 14) sell(p, new ItemStack(Material.TOTEM_OF_UNDYING), 2, 40); //40렙-토템2개
     else if (e.getSlot() == 16) sell(p, new ItemStack(Material.BEACON), 1, 100); //100렙-신호기1개
   }
 
   public static Inventory getInventory(Player p) {
-    Inventory inv = Bukkit.createInventory(p, 27, Enums.EXPSHOP_GUI_TITLE);
+    Inventory inv = Bukkit.createInventory(p, 27, Config.EXPSHOP_GUI_TITLE);
     for (int i = 0; i < 27; i++) {
       if (Set.of(10, 12, 14, 16).contains(i)) continue;
-      inv.setItem(i, Enums.getFiller());
+      inv.setItem(i, Config.getFiller());
     }
-    inv.setItem(10, shopItem(Enums.getStardust(), 40, 40));
-    inv.setItem(12, shopItem(Enums.getStarpiece(), 20, 40));
+    inv.setItem(10, shopItem(Config.getStardust(), 40, 40));
+    inv.setItem(12, shopItem(Config.getStarpiece(), 20, 40));
     inv.setItem(14, shopItem(new ItemStack(Material.TOTEM_OF_UNDYING), 2, 40));
     inv.setItem(16, shopItem(new ItemStack(Material.BEACON), 1, 100));
     return inv;

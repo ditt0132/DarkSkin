@@ -5,7 +5,6 @@ import static dittonut.darkskin.DarkSkin.sr;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.papermc.paper.event.player.PlayerTradeEvent;
@@ -14,7 +13,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
-import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,11 +20,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.BeaconInventory;
@@ -42,16 +38,16 @@ import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
-import org.jetbrains.annotations.Nullable;
 
 public class Events implements Listener {
+
   @EventHandler
   public void onFirework(PlayerInteractEvent e) {
     if (e.getItem() == null) return;
     if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
     PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
-    if (!pdc.has(Enums.PDC_KEY, PersistentDataType.STRING)
-      || !(pdc.get(Enums.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
+    if (!pdc.has(Config.PDC_KEY, PersistentDataType.STRING)
+      || !(pdc.get(Config.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
     AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
 
     e.getPlayer().getLocation().getNearbyPlayers(8).stream()
@@ -134,7 +130,7 @@ public class Events implements Listener {
   public void onDeath(EntityDeathEvent e) {
     if (e.getEntityType() == EntityType.WARDEN) {
       e.getDrops().clear();
-      e.getDrops().add(Enums.getObsipotion());
+      e.getDrops().add(Config.getObsipotion());
     } else if (e.getEntityType() == EntityType.ENDER_DRAGON) {
       World end = Bukkit.getWorld("world_the_end");
       World overworld = Bukkit.getWorld("world");
@@ -179,8 +175,8 @@ public class Events implements Listener {
 
   @EventHandler
   public void onClick(InventoryClickEvent e) {
-    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
-    else if (e.getView().title().equals(Enums.EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
+    if (e.getView().title().equals(Config.ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
+    else if (e.getView().title().equals(Config.EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
   }
 
   @EventHandler
@@ -197,10 +193,10 @@ public class Events implements Listener {
       e.setCancelled(true);
       Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
       List<ItemStack> i = new ArrayList<>();
-      i.add(Enums.getStardust());
-      i.add(Enums.getObsipotion());
-      i.add(Enums.getStarpiece());
-      i.add(Enums.getFirework());
+      i.add(Config.getStardust());
+      i.add(Config.getObsipotion());
+      i.add(Config.getStarpiece());
+      i.add(Config.getFirework());
       inv.addItem(i.toArray(new ItemStack[0]));
       Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
     } else if (e.getView().title().equals(Component.text("더티더티더티더티")) && e.getPlayer().isOp()) {
@@ -212,7 +208,7 @@ public class Events implements Listener {
 
   @EventHandler
   public void onCloseContainer(InventoryCloseEvent e) {
-    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
+    if (e.getView().title().equals(Config.ENCHANT_GUI_TITLE)) {
       ItemStack stack = e.getInventory().getItem(4);
       if (stack == null) return;
       Utils.addItem(e.getPlayer(), stack);
@@ -236,5 +232,4 @@ public class Events implements Listener {
     loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
     e.setTo(loc);
   }
-
 }
