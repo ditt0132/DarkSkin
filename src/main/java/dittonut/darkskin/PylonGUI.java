@@ -54,10 +54,10 @@ public class PylonGUI {
     }
 
     public static Inventory getInventory(Player p) {
-        Inventory inv = Bukkit.createInventory(p, 27, Config.PYLON_GUI_TITLE);
-        ItemStack item = new ItemStack(Config.FILLER_ITEM);
+        Inventory inv = Bukkit.createInventory(p, 27, Config.get().PYLON_GUI_TITLE);
+        ItemStack item = new ItemStack(Config.get().FILLER_ITEM);
         ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(Config.FILLER_MODEL);
+        meta.setCustomModelData(Config.get().FILLER_MODEL);
         meta.displayName(Component.text(""));
         item.setItemMeta(meta);
         for (int i = 0; i < inv.getSize(); i++) {
@@ -87,7 +87,7 @@ public class PylonGUI {
         if (!(e.getWhoClicked() instanceof Player p)) return;
         if (e.getCurrentItem() != null
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
-                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.FILLER_MODEL) {
+                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.get().FILLER_MODEL) {
         } else if (e.getSlot() == 10) { //소환,부활,경험치상점,별조각 플탐보상
             //소헌 letsgo
             //Player selection required btw
@@ -125,29 +125,6 @@ public class PylonGUI {
             // 이건 서브.. 메인은 지상 메테오 파밍
         }
         e.setCancelled(true);
-    }
-
-    /**
-     * Enchants item.
-     * Note: Stardust is consumed by this method
-     *
-     * @param player the player trying to upgrade
-     * @param item   the item trying to upgrade
-     */
-    public static void enchant(HumanEntity player, ItemStack item) {
-        if (!isEnchantable(item)) return;
-        if (!player.getInventory().containsAtLeast(Config.getStardust(), 1)) return;
-        player.getInventory().removeItem(Config.getStardust());
-        int size = item.getEnchantments().size();
-        if ((RandomUtils.nextDouble(0.0, 1.0) < Config.ENCHANT_ADD_CHANCE || size == 0) && size < Config.MAX_ENCHANTMENTS)
-            size++;
-        Set<Enchantment> added = new HashSet<>();
-        item.getEnchantments().forEach((ench, lvl) -> item.removeEnchantment(ench));
-        for (int i = 0; i < size; i++) {
-            Enchantment re = randomEnchant(added.toArray(new Enchantment[0]));
-            added.add(re);
-            item.addUnsafeEnchantment(re, RandomUtils.nextInt(1, re.getMaxLevel()));
-        }
     }
 
     private static boolean isEnchantable(ItemStack stack) {

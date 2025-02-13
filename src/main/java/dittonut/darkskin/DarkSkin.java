@@ -45,7 +45,7 @@ public class DarkSkin extends JavaPlugin {
         }
 
         Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.getOnlinePlayers().forEach(p -> {
-            if (!Config.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
+            if (!Config.get().patrollers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
                 p.sendMessage(mm.deserialize("<red>금지된 아이템을 소지 중이에요! (ELYTRA)"));
                 getLogger().info("[BanItem] %s have ELYTRA!".formatted(p.getName()));
                 p.getInventory().remove(Material.ELYTRA);
@@ -55,7 +55,7 @@ public class DarkSkin extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, Pylon::updateBeacon, 0L, 1200L); //1분마다 신호기를 업데이트해요!
         Bukkit.getScheduler().runTaskTimer(this, Pylon::applyEffects, 0L, 100L); //5초마다 신호기 효과 적용!
         Bukkit.getScheduler().runTaskTimer(this, () -> {
-            Config.rewarded.clear();
+            Config.get().rewarded.clear();
             Bukkit.broadcast(mm.deserialize("일일 보상이 리셋됐어요!"));
         }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
 

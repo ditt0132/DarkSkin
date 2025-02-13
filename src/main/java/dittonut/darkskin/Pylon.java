@@ -24,9 +24,9 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
 );
   // see main class, called every 1min
   public static void updateBeacon() {
-    Config.beacons.forEach((pid, loc) -> {
+    Config.get().beacons.forEach((pid, loc) -> {
       if (!(loc.getBlock() instanceof Beacon b)) { //혹시 몰라요 blockBreakEvent가 일 안할지
-        Config.beacons.put(pid, null); return;
+        Config.get().beacons.put(pid, null); return;
       }
       // todo: make beacon ranges chunk load. do it as updates
     });
@@ -34,9 +34,9 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
 
   //see main class, called every 5 sec
   public static void applyEffects() { // pid는 팀장의 UUID라는거 잊지말기!
-    Config.beacons.forEach((pid, loc) -> {
+    Config.get().beacons.forEach((pid, loc) -> {
       if (!(loc.getBlock().getState() instanceof Beacon b)) { //
-        Config.beacons.put(pid, null); //위에 이미 같은 로직이 있긴 해도 해두면 좋으니까요
+        Config.get().beacons.put(pid, null); //위에 이미 같은 로직이 있긴 해도 해두면 좋으니까요
         return;
       }
       loc.getNearbyPlayers(b.getEffectRange()).forEach(p -> {
@@ -47,6 +47,6 @@ private static final Collection<PotionEffect> enemyEffects = List.of(
   }
 
   public static @Nullable Location pylonLocationOf(OfflinePlayer p) {
-    return Config.beacons.get(FamilyUtil.getOwnerByMember(p).getUniqueId());
+    return Config.get().beacons.get(FamilyUtil.getOwnerByMember(p).getUniqueId());
   }
 }

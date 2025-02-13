@@ -29,10 +29,10 @@ public class EnchantGUI {
     private static final Random r = new Random();
 
     public static Inventory getInventory(Player p) {
-        Inventory inv = Bukkit.createInventory(p, 27, Config.ENCHANT_GUI_TITLE);
-        ItemStack item = new ItemStack(Config.FILLER_ITEM);
+        Inventory inv = Bukkit.createInventory(p, 27, Config.get().ENCHANT_GUI_TITLE);
+        ItemStack item = new ItemStack(Config.get().FILLER_ITEM);
         ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(Config.FILLER_MODEL);
+        meta.setCustomModelData(Config.get().FILLER_MODEL);
         meta.displayName(Component.text(""));
         item.setItemMeta(meta);
         for (int i = 0; i < inv.getSize(); i++) {
@@ -50,7 +50,7 @@ public class EnchantGUI {
         }
         if (e.getCurrentItem() != null
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
-                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.FILLER_MODEL) {
+                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.get().FILLER_MODEL) {
             e.setCancelled(true);
         }
         if (!e.isShiftClick() && e.getSlot() == 4
@@ -90,7 +90,7 @@ public class EnchantGUI {
             item.removeEnchantment(enchantment);
         });
 
-        if (count < Config.MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Config.ENCHANT_ADD_CHANCE) == 0)) {
+        if (count < Config.get().MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Config.get().ENCHANT_ADD_CHANCE) == 0)) {
             count++;
         };
 

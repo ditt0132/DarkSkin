@@ -46,8 +46,8 @@ public class Events implements Listener {
     if (e.getItem() == null) return;
     if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
     PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
-    if (!pdc.has(Config.PDC_KEY, PersistentDataType.STRING)
-      || !(pdc.get(Config.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
+    if (!pdc.has(Config.get().PDC_KEY, PersistentDataType.STRING)
+      || !(pdc.get(Config.get().PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
     AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
 
     e.getPlayer().getLocation().getNearbyPlayers(8).stream()
@@ -175,8 +175,8 @@ public class Events implements Listener {
 
   @EventHandler
   public void onClick(InventoryClickEvent e) {
-    if (e.getView().title().equals(Config.ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
-    else if (e.getView().title().equals(Config.EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
+    if (e.getView().title().equals(Config.get().ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
+    else if (e.getView().title().equals(Config.get().EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
   }
 
   @EventHandler
@@ -208,7 +208,7 @@ public class Events implements Listener {
 
   @EventHandler
   public void onCloseContainer(InventoryCloseEvent e) {
-    if (e.getView().title().equals(Config.ENCHANT_GUI_TITLE)) {
+    if (e.getView().title().equals(Config.get().ENCHANT_GUI_TITLE)) {
       ItemStack stack = e.getInventory().getItem(4);
       if (stack == null) return;
       Utils.addItem(e.getPlayer(), stack);

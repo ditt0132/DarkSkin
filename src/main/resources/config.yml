@@ -1,6 +1,6 @@
 # Formatted in MiniMessage. see https://docs.advntr.dev/minimessage/format
 # Title name must be unique, un-reproducible in anvil for preventing dupe
-enchant-gui-title: "<red>"
+enchant-gui-title: "<#F40001><reset>마법 부여"
 
 # Maximum added enchantments count.
 max-enchantments: 10

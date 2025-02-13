@@ -54,7 +54,7 @@ public class ExpShopGUI {
   }
 
   public static Inventory getInventory(Player p) {
-    Inventory inv = Bukkit.createInventory(p, 27, Config.EXPSHOP_GUI_TITLE);
+    Inventory inv = Bukkit.createInventory(p, 27, Config.get().EXPSHOP_GUI_TITLE);
     for (int i = 0; i < 27; i++) {
       if (Set.of(10, 12, 14, 16).contains(i)) continue;
       inv.setItem(i, Config.getFiller());
