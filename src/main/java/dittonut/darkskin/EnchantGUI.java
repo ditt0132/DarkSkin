@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
@@ -30,10 +29,10 @@ public class EnchantGUI {
     private static final Random r = new Random();
 
     public static Inventory getInventory(Player p) {
-        Inventory inv = Bukkit.createInventory(p, 27, Enums.ENCHANT_GUI_TITLE);
-        ItemStack item = new ItemStack(Enums.FILLER_ITEM);
+        Inventory inv = Bukkit.createInventory(p, 27, Config.get().ENCHANT_GUI_TITLE);
+        ItemStack item = new ItemStack(Config.get().FILLER_ITEM);
         ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(Enums.FILLER_MODEL);
+        meta.setCustomModelData(Config.get().FILLER_MODEL);
         meta.displayName(Component.text(""));
         item.setItemMeta(meta);
         for (int i = 0; i < inv.getSize(); i++) {
@@ -46,12 +45,12 @@ public class EnchantGUI {
     public static void click(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player p)) return;
         if (e.getSlot() == 26 && p.isOp()) {
-            p.getInventory().addItem(Enums.getStardust());
+            p.getInventory().addItem(Config.getStardust());
             e.setCancelled(true);
         }
         if (e.getCurrentItem() != null
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
-                && e.getCurrentItem().getItemMeta().getCustomModelData() == Enums.FILLER_MODEL) {
+                && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.get().FILLER_MODEL) {
             e.setCancelled(true);
         }
         if (!e.isShiftClick() && e.getSlot() == 4
@@ -72,16 +71,16 @@ public class EnchantGUI {
         if (!(e instanceof Player p)) return;
         if (!isEnchantable(item)) {
             p.sendMessage(mm.deserialize("<red>인챈트가 불가능한 아이템이에요!"));
-            p.playNote(p.getLocation(), Instrument.DIDGERIDOO, Note.sharp(0, Tone.F)); //TODO: 이거 소리 옆에서들리는지, NOTE: NonStandard
+            p.playNote(p.getLocation(), Instrument.DIDGERIDOO, Note.sharp(0, Tone.F)); //NOTE: NonStandard
             return;
         }
-        if (!p.getInventory().containsAtLeast(Enums.getStardust(), 1)) {
+        if (!p.getInventory().containsAtLeast(Config.getStardust(), 1)) {
             p.sendMessage(mm.deserialize("<gold>별가루<red>가 부족해요!"));
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5f, 0.86f);
             return;
         }
         p.playSound(p.getLocation(), Sound.BLOCK_CHAIN_BREAK, 1.0f, 1.5f);
-        p.getInventory().removeItem(Enums.getStardust());
+        p.getInventory().removeItem(Config.getStardust());
 
         Set<Enchantment> current = item.getEnchantments().keySet();
         Map<Enchantment, Integer> changed = new HashMap<>();
@@ -91,7 +90,7 @@ public class EnchantGUI {
             item.removeEnchantment(enchantment);
         });
 
-        if (count < Enums.MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0)) {
+        if (count < Config.get().MAX_ENCHANTMENTS && (count == 0 || r.nextInt(Config.get().ENCHANT_ADD_CHANCE) == 0)) {
             count++;
         };
 

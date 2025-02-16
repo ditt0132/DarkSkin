@@ -5,15 +5,14 @@ import static dittonut.darkskin.DarkSkin.sr;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.papermc.paper.event.player.PlayerTradeEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Sign;
-import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -39,15 +37,17 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scoreboard.Team;
 
 public class Events implements Listener {
+
   @EventHandler
   public void onFirework(PlayerInteractEvent e) {
     if (e.getItem() == null) return;
     if (!(e.getItem().getType() == Material.FIREWORK_ROCKET)) return;
     PersistentDataContainer pdc = e.getItem().getItemMeta().getPersistentDataContainer();
-    if (!pdc.has(Enums.PDC_KEY, PersistentDataType.STRING)
-      || !(pdc.get(Enums.PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
+    if (!pdc.has(Config.get().PDC_KEY, PersistentDataType.STRING)
+      || !(pdc.get(Config.get().PDC_KEY, PersistentDataType.STRING).equals("FIREWORK"))) return;
     AtomicReference<Player> lastPlayer = new AtomicReference<>(e.getPlayer());
 
     e.getPlayer().getLocation().getNearbyPlayers(8).stream()
@@ -95,11 +95,14 @@ public class Events implements Listener {
 //        }); //
 //    }
 
-  private static final double MAX_DISTANCE_SQUARED = 25.0d;
+  private static final double MAX_DISTANCE_SQUARED = 25.0d * 25.0d;
 
   @EventHandler
-  public void onVillager(VillagerReplenishTradeEvent e) {
-
+  public void onVillager(PlayerTradeEvent e) {
+    if (e.getTrade().getResult().getType() == Material.ENCHANTED_BOOK) {
+      e.setCancelled(true);
+      e.getPlayer().sendMessage(mm.deserialize("<red>금지된 거래예요! [ENCHANTED_BOOK]"));
+    }
   }
 
   @EventHandler
@@ -127,7 +130,7 @@ public class Events implements Listener {
   public void onDeath(EntityDeathEvent e) {
     if (e.getEntityType() == EntityType.WARDEN) {
       e.getDrops().clear();
-      e.getDrops().add(Enums.getObsipotion());
+      e.getDrops().add(Config.getObsipotion());
     } else if (e.getEntityType() == EntityType.ENDER_DRAGON) {
       World end = Bukkit.getWorld("world_the_end");
       World overworld = Bukkit.getWorld("world");
@@ -148,6 +151,7 @@ public class Events implements Listener {
       });
     }
   }
+
 
   @EventHandler
   public void onChat(AsyncChatEvent event) {
@@ -171,9 +175,8 @@ public class Events implements Listener {
 
   @EventHandler
   public void onClick(InventoryClickEvent e) {
-    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
-      EnchantGUI.click(e);
-    }
+    if (e.getView().title().equals(Config.get().ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
+    else if (e.getView().title().equals(Config.get().EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
   }
 
   @EventHandler
@@ -190,31 +193,36 @@ public class Events implements Listener {
       e.setCancelled(true);
       Inventory inv = Bukkit.createInventory(e.getPlayer(), 54);
       List<ItemStack> i = new ArrayList<>();
-      i.add(Enums.getStardust());
-      i.add(Enums.getObsipotion());
-      i.add(Enums.getStarpiece());
-      i.add(Enums.getFirework());
+      i.add(Config.getStardust());
+      i.add(Config.getObsipotion());
+      i.add(Config.getStarpiece());
+      i.add(Config.getFirework());
       inv.addItem(i.toArray(new ItemStack[0]));
       Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getPlayer().openInventory(inv));
+    } else if (e.getView().title().equals(Component.text("더티더티더티더티")) && e.getPlayer().isOp()) {
+      e.setCancelled(true);
+      Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
+        ()-> e.getPlayer().openInventory(ExpShopGUI.getInventory((Player) e.getPlayer())));
     }
   }
 
   @EventHandler
   public void onCloseContainer(InventoryCloseEvent e) {
-    if (e.getView().title().equals(Enums.ENCHANT_GUI_TITLE)) {
+    if (e.getView().title().equals(Config.get().ENCHANT_GUI_TITLE)) {
       ItemStack stack = e.getInventory().getItem(4);
       if (stack == null) return;
-      e.getPlayer().getInventory().addItem(stack).forEach((i, item) ->
-        e.getPlayer().getWorld().dropItem(e.getPlayer().getLocation(), item));
+      Utils.addItem(e.getPlayer(), stack);
     }
   }
 
   @EventHandler
   public void onJoin(PlayerJoinEvent e) throws MineSkinException, DataRequestException {
-    String teamOwner = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream().filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElseThrow().getName().substring(3);
+    Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeams().stream()
+      .filter(t -> t.getName().startsWith("dt.") && t.hasPlayer(e.getPlayer())).findFirst().orElse(null);
+    if (team == null) return;
+    String teamOwner = team.getName().substring(3);
     InputDataResult res = sr.getSkinStorage().findOrCreateSkinData(teamOwner).orElseThrow();
     sr.getPlayerStorage().setSkinIdOfPlayer(e.getPlayer().getUniqueId(), res.getIdentifier());
-    // FIXME: orElseThrow gets error
   }
 
   @EventHandler
@@ -224,5 +232,4 @@ public class Events implements Listener {
     loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
     e.setTo(loc);
   }
-
 }

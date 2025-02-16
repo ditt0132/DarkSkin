@@ -5,12 +5,13 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Utils {
   public static Random r = new Random();
-  public static boolean addItem(Player p, ItemStack item) { //TODO: change this somewhere used, on enchant gui return item
+  public static boolean addItem(HumanEntity p, ItemStack item) {
     HashMap<Integer, ItemStack> left = p.getInventory().addItem(item);
     if (!left.isEmpty()) {
       left.forEach((i, stack) -> p.getWorld().dropItem(p.getLocation(), stack));
@@ -19,7 +20,7 @@ public class Utils {
   }
 
   /**
-   * Nite: THIS DOESNT CLONE ITEMSTACK!!
+   * Note: THIS DOESN'T CLONE ITEMSTACK!!
   */
   public static ItemStack withAmount(ItemStack stack, int amount) {
     stack.setAmount(amount);

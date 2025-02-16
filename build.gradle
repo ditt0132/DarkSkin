@@ -1,8 +1,10 @@
+import xyz.jpenilla.runtask.task.AbstractRun
+
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id 'com.gradleup.shadow' version '9.0.0-beta6'
-}
+    }
 
 group = 'dittonut'
 version = '1.0-SNAPSHOT'
@@ -47,6 +49,14 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
     }
+}
+
+tasks.withType(AbstractRun) {
+    javaLauncher = javaToolchains.launcherFor {
+        vendor = JvmVendorSpec.JETBRAINS
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    jvmArgs("-XX:+AllowEnhancedClassRedefinition")
 }
 
 processResources {

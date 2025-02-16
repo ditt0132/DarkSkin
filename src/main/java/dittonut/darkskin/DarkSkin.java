@@ -2,8 +2,6 @@ package dittonut.darkskin;
 
 import org.bukkit.*;
 import org.bukkit.World.Environment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Marker;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
@@ -11,16 +9,18 @@ import org.bukkit.scoreboard.Team;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
+
+import java.io.IOException;
 
 public class DarkSkin extends JavaPlugin {
     public static final MiniMessage mm = MiniMessage.miniMessage();
     public static DarkSkin instance;
     public static ProtocolManager pm;
     public static SkinsRestorer sr;
+    private ConfigManager configManager;
 
     public static DarkSkin getInstance() {
         return instance;
@@ -31,6 +31,15 @@ public class DarkSkin extends JavaPlugin {
         instance = this;
         sr = SkinsRestorerProvider.get();
         pm = ProtocolLibrary.getProtocolManager();
+
+        try {
+            configManager = new ConfigManager(getDataFolder());
+        } catch (IOException e) {
+            getLogger().severe("설정 파일을 로드하는 중 오류 발생: " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        Config.load();
 
         Bukkit.getPluginCommand("close-end").setExecutor(new Commands());
         Bukkit.getPluginCommand("open-end").setExecutor(new Commands());
@@ -48,7 +57,7 @@ public class DarkSkin extends JavaPlugin {
         }
 
         Bukkit.getScheduler().runTaskTimer(this, () -> Bukkit.getOnlinePlayers().forEach(p -> {
-            if (!Enums.patrolers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
+            if (!Config.get().patrollers.contains(p.getUniqueId()) && p.getInventory().contains(Material.ELYTRA)) {
                 p.sendMessage(mm.deserialize("<red>금지된 아이템을 소지 중이에요! (ELYTRA)"));
                 getLogger().info("[BanItem] %s have ELYTRA!".formatted(p.getName()));
                 p.getInventory().remove(Material.ELYTRA);
@@ -58,7 +67,7 @@ public class DarkSkin extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, Pylon::updateBeacon, 0L, 1200L); //1분마다 신호기를 업데이트해요!
         Bukkit.getScheduler().runTaskTimer(this, Pylon::applyEffects, 0L, 100L); //5초마다 신호기 효과 적용!
         Bukkit.getScheduler().runTaskTimer(this, () -> {
-            Enums.rewarded.clear();
+            Config.get().rewarded.clear();
             Bukkit.broadcast(mm.deserialize("일일 보상이 리셋됐어요!"));
         }, 0L, 72000L); //1시간마다 보상을 리셋해요!!
 
