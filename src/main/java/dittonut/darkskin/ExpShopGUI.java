@@ -3,6 +3,7 @@ package dittonut.darkskin;
 import java.util.List;
 import java.util.Set;
 
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import net.kyori.adventure.text.Component;
+import org.w3c.dom.Text;
 
 import static dittonut.darkskin.DarkSkin.mm;
 
@@ -71,7 +73,8 @@ public class ExpShopGUI {
   */
   private static ItemStack shopItem(ItemStack stack, int count, int cost) {
     stack.setAmount(count);
-    stack.lore(List.of(Component.text(""), mm.deserialize("<green>경험치: %d레벨".formatted(cost))));
+    stack.lore(List.of(Component.text(""), mm.deserialize("<green>경험치: %d레벨".formatted(cost))
+      .decoration(TextDecoration.ITALIC, false)));
     return stack;
   }
 }

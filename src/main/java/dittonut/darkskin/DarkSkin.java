@@ -37,13 +37,13 @@ public class DarkSkin extends JavaPlugin {
     sr = SkinsRestorerProvider.get();
     pm = ProtocolLibrary.getProtocolManager();
 
-    try {
-      configManager = new ConfigManager(getDataFolder());
-    } catch (IOException e) {
-      getLogger().severe("설정 파일을 로드하는 중 오류 발생: " + e.getMessage());
-      Bukkit.getPluginManager().disablePlugin(this);
-      return;
-    }
+//    try {
+//      configManager = new ConfigManager(getDataFolder());
+//    } catch (IOException e) {
+//      getLogger().severe("설정 파일을 로드하는 중 오류 발생: " + e.getMessage());
+//      Bukkit.getPluginManager().disablePlugin(this);
+//      return;
+//    }
     Config.load();
 
     Bukkit.getPluginCommand("close-end").setExecutor(new Commands());
@@ -116,6 +116,7 @@ public class DarkSkin extends JavaPlugin {
   public void onDisable() {
     // Plugin shutdown logic
     Pylon.updateBeacon(); //혹시 몰라요
+    Config.save();
     getLogger().info("Disabled!");
   }
 

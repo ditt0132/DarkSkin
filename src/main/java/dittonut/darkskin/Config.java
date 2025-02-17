@@ -1,8 +1,10 @@
 package dittonut.darkskin;
 
-import static dittonut.darkskin.DarkSkin.mm;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -10,114 +12,136 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-@ConfigSerializable
 public class Config {
   private static Config instance;
-  private static YamlConfigurationLoader loader;
-  private static File configFile;
+  private static final MiniMessage mm = MiniMessage.miniMessage();
+  private final File file;
+  private final FileConfiguration config;
+
+  // NO SAVE
+  public static boolean enableEnd = false;
+
+  public Component ENCHANT_GUI_TITLE = mm.deserialize("<#F40001><reset>마법 부여");
+  public Component PYLON_GUI_TITLE = mm.deserialize("<#F40002><reset>파일런");
+  public Component EXPSHOP_GUI_TITLE = mm.deserialize("<#F40003><reset>경험치 상점");
+  public int MAX_ENCHANTMENTS = 10;
+  public int ENCHANT_ADD_CHANCE = 10;
+  public Component STARDUST_NAME = mm.deserialize("<gold>별가루");
+  public Material FILLER_ITEM = Material.GRAY_STAINED_GLASS_PANE;
+  public int FILLER_MODEL = 1013145;
+  public NamespacedKey PDC_KEY = new NamespacedKey("darkforest", "custom");
+  public Component STARPIECE_NAME = mm.deserialize("<light_purple>별조각");
+  public Component OBSI_POTION_NAME = mm.deserialize("<light_purple>흑요석 물약");
+  public Set<UUID> patrollers = new HashSet<>();
+  public Set<UUID> rewarded = new HashSet<>();
+  public Map<UUID, Location> beacons = new HashMap<>();
+  public Set<Chunk> forceLoads = new HashSet<>();
+  public Set<UUID> banned = new HashSet<>();
+
+  private Config() {
+    this.file = new File(DarkSkin.getInstance().getDataFolder(), "config.yml");
+    this.config = YamlConfiguration.loadConfiguration(file);
+  }
+
+  public static Config get() {
+    if (instance == null) {
+      throw new IllegalStateException("Config is not loaded yet!");
+    }
+    return instance;
+  }
 
   public static void load() {
-    configFile = new File(DarkSkin.getInstance().getDataFolder(), "config.yml");
-    loader = YamlConfigurationLoader.builder().file(configFile).build();
-
-    try {
-      CommentedConfigurationNode root = loader.load();
-      instance = root.get(Config.class, new Config());
-      save(); // 기본값을 유지
-    } catch (IOException e) {
-      System.err.println("An error occurred while loading this configuration: " + e.getMessage());
-      if (e.getCause() != null) {
-        e.getCause().printStackTrace();
-      }
+    if (instance != null) {
+      Bukkit.getLogger().severe("Config is already loaded!");
       Bukkit.getPluginManager().disablePlugin(DarkSkin.getInstance());
+      return;
+    }
+    instance = new Config();
+    instance.loadValues();
+    instance.startAutoSave();
+  }
+
+  private void loadValues() {
+    ENCHANT_GUI_TITLE = mm.deserialize(config.getString("enchant_gui_title", "<#F40001><reset>마법 부여"));
+    PYLON_GUI_TITLE = mm.deserialize(config.getString("pylon_gui_title", "<#F40002><reset>파일런"));
+    EXPSHOP_GUI_TITLE = mm.deserialize(config.getString("expshop_gui_title", "<#F40003><reset>경험치 상점"));
+    MAX_ENCHANTMENTS = config.getInt("max_enchantments", 10);
+    ENCHANT_ADD_CHANCE = config.getInt("enchant_add_chance", 10);
+    STARDUST_NAME = mm.deserialize(config.getString("stardust_name", "<gold>별가루"));
+    FILLER_ITEM = Material.valueOf(config.getString("filler_item", "GRAY_STAINED_GLASS_PANE"));
+    FILLER_MODEL = config.getInt("filler_model", 1013145);
+    PDC_KEY = new NamespacedKey("darkforest", "custom");
+    STARPIECE_NAME = mm.deserialize(config.getString("starpiece_name", "<light_purple>별조각"));
+    OBSI_POTION_NAME = mm.deserialize(config.getString("obsi_potion_name", "<light_purple>흑요석 물약"));
+
+    patrollers.clear();
+    for (String uuid : config.getStringList("patrollers")) {
+      patrollers.add(UUID.fromString(uuid));
+    }
+
+    rewarded.clear();
+    for (String uuid : config.getStringList("rewarded")) {
+      rewarded.add(UUID.fromString(uuid));
+    }
+
+    banned.clear();
+    for (String uuid : config.getStringList("banned")) {
+      banned.add(UUID.fromString(uuid));
     }
   }
 
   public static void save() {
+    if (instance == null) return;
+    new BukkitRunnable() {
+      @Override
+      public void run() {
+        instance.saveValues();
+      }
+    }.runTaskAsynchronously(DarkSkin.getInstance());
+  }
+
+  private void saveValues() {
+    config.set("enchant_gui_title", mm.serialize(ENCHANT_GUI_TITLE));
+    config.set("pylon_gui_title", mm.serialize(PYLON_GUI_TITLE));
+    config.set("expshop_gui_title", mm.serialize(EXPSHOP_GUI_TITLE));
+    config.set("max_enchantments", MAX_ENCHANTMENTS);
+    config.set("enchant_add_chance", ENCHANT_ADD_CHANCE);
+    config.set("stardust_name", mm.serialize(STARDUST_NAME));
+    config.set("filler_item", FILLER_ITEM.name());
+    config.set("filler_model", FILLER_MODEL);
+    config.set("starpiece_name", mm.serialize(STARPIECE_NAME));
+    config.set("obsi_potion_name", mm.serialize(OBSI_POTION_NAME));
+
+    List<String> patrollerList = new ArrayList<>();
+    for (UUID uuid : patrollers) {
+      patrollerList.add(uuid.toString());
+    }
+    config.set("patrollers", patrollerList);
+
+    List<String> rewardedList = new ArrayList<>();
+    for (UUID uuid : rewarded) {
+      rewardedList.add(uuid.toString());
+    }
+    config.set("rewarded", rewardedList);
+
+    List<String> bannedList = new ArrayList<>();
+    for (UUID uuid : banned) {
+      bannedList.add(uuid.toString());
+    }
+    config.set("banned", bannedList);
+
     try {
-      CommentedConfigurationNode root = loader.load();
-      root.set(Config.class, instance);
-      loader.save(root);
+      config.save(file);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-
-  public static Config get() {
-    return instance;
-  }
-
-  public static boolean enableEnd = false;
-
-  @Setting
-  @Comment("GUI 이름. 유저가 따라할 수 없게 컬러 코드를 넣는걸 추천해요!")
-  public Component ENCHANT_GUI_TITLE = mm.deserialize("<#F40001><reset>마법 부여");
-
-  @Setting
-  public Component PYLON_GUI_TITLE = mm.deserialize("<#F40002><reset>파일런");
-
-  @Setting
-  public Component EXPSHOP_GUI_TITLE = mm.deserialize("<#F40003><reset>경험치 상점");
-
-
-  @Setting
-  public int MAX_ENCHANTMENTS = 10;
-
-  @Setting
-  public int ENCHANT_ADD_CHANCE = 10;
-
-  @Setting
-  public Component STARDUST_NAME = mm.deserialize("<gold>별가루");
-
-  @Setting
-  public Material FILLER_ITEM = Material.GRAY_STAINED_GLASS_PANE;
-
-  @Setting
-  public int FILLER_MODEL = 1013145;
-
-
-  @Setting
-  public NamespacedKey PDC_KEY = new NamespacedKey("darkforest", "custom");
-
-  @Setting
-  public Component STARPIECE_NAME = mm.deserialize("<light_purple>별조각");
-
-
-
-  @Setting
-  public Component OBSI_POTION_NAME = mm.deserialize("<light_purple>흑요석 물약");
-
-  @Setting
-  @Comment("정찰자 목록 (UUID)")
-  public Set<UUID> patrollers = new HashSet<>();
-
-  @Setting
-  @Comment("일일보상을 받은 유저 목록 (UUID)")
-  public Set<UUID> rewarded = new HashSet<>();
-
-  @Setting
-  @Comment("파일런 위치 (팀장 UUID) -> 위치")
-  public Map<UUID, Location> beacons = new HashMap<>();
-
-  @Setting
-  @Comment("로딩되는 청크 -- 사용되지 않음")
-  public Set<Chunk> forceLoads = new HashSet<>();
-
-  @Setting
-  @Comment("죽은 사람들 목록 (UUID)")
-  public Set<UUID> banned = new HashSet<>();
 
   public static ItemStack getStardust() {
     ItemStack item = new ItemStack(Material.GLOWSTONE_DUST);
@@ -162,5 +186,9 @@ public class Config {
     meta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 216000, 0), true);
     item.setItemMeta(meta);
     return item;
+  }
+
+  private void startAutoSave() {
+    Bukkit.getScheduler().runTaskTimerAsynchronously(DarkSkin.getInstance(), Config::save, 6000L, 6000L);
   }
 }

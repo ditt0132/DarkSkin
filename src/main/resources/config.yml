@@ -1,20 +1,20 @@
-# Formatted in MiniMessage. see https://docs.advntr.dev/minimessage/format
-# Title name must be unique, un-reproducible in anvil for preventing dupe
-enchant-gui-title: "<#F40001><reset>마법 부여"
-
-# Maximum added enchantments count.
-max-enchantments: 10
-
-# Chance to add enchantments.
-enchant-add-chance: 0.25
-
-# MiniMessage, we recommend un-reproducible in anvil too
-stardust-name: "<gold>별가루"
-
-# Valid Custom Model Data. REQUIRED!!
-# Used for filler in GUI, detecting item is filler.
-# We recommend assigning empty model to this Custom Model Data
-filler-model: 1023123
-
-# AIR is not recommended. it can make errors and dupe
-filler-mat: PAPER
+## Formatted in MiniMessage. see https://docs.advntr.dev/minimessage/format
+## Title name must be unique, un-reproducible in anvil for preventing dupe
+#enchant-gui-title: "<#F40001><reset>마법 부여"
+#
+## Maximum added enchantments count.
+#max-enchantments: 10
+#
+## Chance to add enchantments.
+#enchant-add-chance: 0.25
+#
+## MiniMessage, we recommend un-reproducible in anvil too
+#stardust-name: "<gold>별가루"
+#
+## Valid Custom Model Data. REQUIRED!!
+## Used for filler in GUI, detecting item is filler.
+## We recommend assigning empty model to this Custom Model Data
+#filler-model: 1023123
+#
+## AIR is not recommended. it can make errors and dupe
+#filler-mat: PAPER
