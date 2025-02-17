@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.papermc.paper.event.player.ChatEvent;
 import io.papermc.paper.event.player.PlayerTradeEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -95,7 +97,7 @@ public class Events implements Listener {
 //        }); //
 //    }
 
-  private static final double MAX_DISTANCE_SQUARED = 25.0d * 25.0d;
+  private static final double MAX_DISTANCE = 25.0d;
 
   @EventHandler
   public void onVillager(PlayerTradeEvent e) {
@@ -154,22 +156,14 @@ public class Events implements Listener {
 
 
   @EventHandler
-  public void onChat(AsyncChatEvent event) {
-    Player sender = event.getPlayer();
-    event.viewers().removeIf(audience -> {
-        if (!(audience instanceof Player player)) return false;
-        return !player.getWorld().equals(sender.getWorld()) ||
-          player.getLocation().distanceSquared(sender.getLocation()) > MAX_DISTANCE_SQUARED;
-      }
-    );
-
-    event.renderer((source, sourceDisplayName, message, viewer) -> {
-      if (!(viewer instanceof Player player)) return message;
-      double distance = player.getLocation().distance(sender.getLocation());
-      Component prefix = mm.deserialize(String.format("<dark_green>[%dm]</dark_green> ", (int) distance));
-      return prefix.append(sender.displayName())
-        .append(Component.text(": "))
-        .append(message);
+  public void onChat(ChatEvent e) {
+    System.out.println(PlainTextComponentSerializer.plainText().serialize(e.message()));
+    Location sl = e.getPlayer().getLocation();
+    sl.getNearbyPlayers(25).forEach(p -> {
+        double dist = p.getLocation().distance(sl);
+        p.sendMessage(mm.deserialize("<dark_green>[%dm]<reset> <%s> "
+        .formatted((int) p.getLocation().distance(sl), e.getPlayer().getName()))
+          .append(e.message()));
     });
   }
 
