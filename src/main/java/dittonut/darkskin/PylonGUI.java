@@ -9,6 +9,8 @@ import java.util.Set;
 import org.apache.commons.lang3.RandomUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -21,8 +23,11 @@ import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
 
+import static dittonut.darkskin.DarkSkin.mm;
+
 public class PylonGUI {
     private static final Random r = new Random();
+    private static final CommandSender quietSender = Bukkit.createCommandSender((ignored) -> {});
 
     /**
      * Note: this not automatically add players to rewarded list caller must do it
@@ -71,17 +76,19 @@ public class PylonGUI {
 
     }
 
-    public static void reviveClick(InventoryClickEvent e) {
-        //The gui must have 9 slots, and skulls with player skin. can get name from skullowner
-        if (e.getCurrentItem().getType() == Material.PLAYER_HEAD
-                && e.getCurrentItem().getItemMeta() instanceof SkullMeta meta) {
-            //TODO: consume here
-            ItemStack item = e.getCurrentItem(); //note: set needed
-            DeathManager.revive(meta.getOwningPlayer());
-            // show message, totem effect
-            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getView().close());
-        }
-    }
+//    public static void reviveClick(InventoryClickEvent e) {
+////        //The gui must have 9 slots, and skulls with player skin. can get name from skullowner
+////        if (e.getCurrentItem().getType() == Material.PLAYER_HEAD
+////                && e.getCurrentItem().getItemMeta() instanceof SkullMeta meta) {
+////            //: consume here
+////            ItemStack item = e.getCurrentItem(); //note: set needed
+////            DeathManager.revive(meta.getOwningPlayer());
+////            // show message, totem effect
+////            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> e.getView().close());
+////        }
+//        // 더티가 해주겠지? revivegui <uuid>
+//
+//    }
 
     public static void click(InventoryClickEvent e) { //TODO: IMPORTANT! check about patrol firework
         if (!(e.getWhoClicked() instanceof Player p)) return;
@@ -95,34 +102,17 @@ public class PylonGUI {
             //TODO: make this
             //TODO: Find how many needed, it will be on playing
         } else if (e.getSlot() == 12) {
-            //TODO: 부활
-            //48시간->32에메
-            //시간당 계산 필요->0.67/h, 올림
-            //여러번 죽으면 같나? 아마 같은듯?
-            //TODO: 살릴사람 선택ui
-            //see reviveClick
-            int cost = Math.round(/*RespawnHour*/25 * (32f / 48)); //TODO: real respawn time in hour
-            if (containsAtLeast(p.getInventory(), Material.EMERALD, cost)) {
-                //TODO: 살리기 ㄱㄴ
-            }
+            // TODO: 더티가 해줄거야
+            Bukkit.dispatchCommand(quietSender, "revivegui %s".formatted(e.getWhoClicked().getUniqueId().toString()));
         } else if (e.getSlot() == 14) {
-            //todo: 경럼치 상점 클릭처리
-            p.openInventory(ExpShopGUI.getInventory(p));
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> p.openInventory(ExpShopGUI.getInventory(p)));
         } else if (e.getSlot() == 16) {
-            // todo: 일일보상
-            // 시스템: 매 n시간마다(알림, in mainclass) 보상받은자 세트 리셋
-            // 이 버튼 누르면 보상주고 그 리스트에 추가됨
-            // 보상 확률: 확정 별가루1개
-            // 65% 별가루 나머지 별조각
-            // 별가루: (독립적 확률이 돌아감)
-            //   50% 별가루한개더
-            //   25% 별가루한개
-            //별조각:
-            //   45% 벌조각한개
-            //   15% 별조각한개더
-            //
-            // 10% 별조각/별가루랜덤 10개
-            // 이건 서브.. 메인은 지상 메테오 파밍
+            if (!Config.get().rewarded.contains(p.getUniqueId()))
+                Utils.addItem(p, getDailyReward());
+            else {
+                p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5f, 0.86f);
+                p.sendMessage(mm.deserialize("<red>이미 접속 보상을 받았어요!"));
+            }
         }
         e.setCancelled(true);
     }
