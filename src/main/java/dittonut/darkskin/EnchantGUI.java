@@ -109,23 +109,6 @@ public class EnchantGUI {
         }
 
         item.addUnsafeEnchantments(changed);
-
-//        Set<Enchantment> enchs = item.getEnchantments().keySet();
-//        int size = enchs.size();
-//
-//        if (size == 0 || (r.nextInt(Enums.ENCHANT_ADD_CHANCE) == 0) && size < Enums.MAX_ENCHANTMENTS) size++;
-//        Map<Enchantment, Integer> added = new HashMap<>();
-//        item.getEnchantments().forEach((ench, lvl) -> item.removeEnchantment(ench));
-//        for (int i = 0; i < size; i++) {
-//            if (enchs.contains(Enchantment.BINDING_CURSE) || r.nextInt(1000) == 0)
-//                added.put(Enchantment.BINDING_CURSE, 1);
-//            else if (enchs.contains(Enchantment.VANISHING_CURSE) || r.nextInt(1000) == 0)
-//                added.put(Enchantment.VANISHING_CURSE, 1);
-//            else {
-//                Enchantment re = randomEnchant(added.keySet());
-//                added.put(re, RandomUtils.nextInt(1, re.getMaxLevel()));
-//            }
-//        }
     }
 
     private static boolean isEnchantable(ItemStack stack) {
