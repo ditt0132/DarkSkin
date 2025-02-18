@@ -1,8 +1,5 @@
 package dittonut.darkskin;
 
-import static dittonut.darkskin.DarkSkin.mm;
-import static dittonut.darkskin.DarkSkin.sr;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,7 +11,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -41,7 +41,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.Team;
 
+import static dittonut.darkskin.DarkSkin.*;
+
 public class Events implements Listener {
+  public static PlainTextComponentSerializer plainText = PlainTextComponentSerializer.plainText();
 
   @EventHandler
   public void onFirework(PlayerInteractEvent e) {
@@ -139,32 +142,55 @@ public class Events implements Listener {
       if (end == null || overworld == null)
         throw new IllegalStateException("World 'world_the_end' or 'world' is null!");
       end.sendMessage(mm.deserialize("드래곤이 죽었어요. 엔드 차원이 10분 뒤에 닫혀요!"));
-      // 보상 뿌리기
+      // TODO: 보상 뿌리기
+      Config.enableEnd = false;
 
-      Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
+      Bukkit.getScheduler().runTaskLater(DarkSkin.getInstance(), () -> {
         end.getPlayers().forEach(p -> {
-          // 죽을 시 침대 또는 파일런 또는 월드 스폰으로 이동
+          // 닫힐 시 침대 또는 파일런 또는 월드 스폰으로 이동
           Location home = p.getBedSpawnLocation();
           if (home == null) home = Pylon.pylonLocationOf(p);
           if (home == null) home = overworld.getSpawnLocation();
           p.teleport(home);
         });
         //
-      });
+      }, 12000L);
     }
   }
 
+  @EventHandler
+  public void onSpawn(EntitySpawnEvent e) {
+    if (!(e.getEntityType() == EntityType.ENDER_DRAGON)) return;
+    EnderDragon drgn = (EnderDragon) e.getEntity();
+    drgn.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(1000.0);
+    drgn.setHealth(1000.0);
+  }
 
+  @SuppressWarnings("deprecation") //나는 ASYNC가 싫어ㅓㅓ 컴파일러야 닥쳐^^
   @EventHandler
   public void onChat(ChatEvent e) {
-    System.out.println(PlainTextComponentSerializer.plainText().serialize(e.message()));
+    String msg = plainText.serialize(e.message());
+    e.setCancelled(true);
+    DarkSkin.getInstance().getLogger().info("<%s> ".formatted(e.getPlayer().getName())
+      + msg);
     Location sl = e.getPlayer().getLocation();
-    sl.getNearbyPlayers(25).forEach(p -> {
-        double dist = p.getLocation().distance(sl);
-        p.sendMessage(mm.deserialize("<dark_green>[%dm]<reset> <%s> "
-        .formatted((int) p.getLocation().distance(sl), e.getPlayer().getName()))
-          .append(e.message()));
+    sl.getNearbyPlayers(25.0d).forEach(p -> {
+      double dist = p.getLocation().distance(sl);
+      p.sendMessage(mm.deserialize("<dark_green>[%dm]<reset> <"
+          .formatted((int) dist))
+        .append(e.getPlayer().displayName())
+        .append(Component.text("> "))
+        .append(e.message()));
     });
+
+    if (msg.equals(quizAnswer)) {
+      if (msg.matches("\\d+")) Bukkit.broadcast(e.getPlayer().displayName()
+        .append(mm.deserialize("<reset>님이 퀴즈를 맞혔어요! 정답: <green>%s".formatted(quizAnswer))));
+      else Bukkit.broadcast(e.getPlayer().displayName()
+        .append(mm.deserialize("<reset>님이 타자대결을 이겼어요!")));
+      quizAnswer = "";
+      Utils.addItem(e.getPlayer(), PylonGUI.getDailyReward());
+    }
   }
 
   @EventHandler
@@ -196,7 +222,7 @@ public class Events implements Listener {
     } else if (e.getView().title().equals(Component.text("더티더티더티더티")) && e.getPlayer().isOp()) {
       e.setCancelled(true);
       Bukkit.getScheduler().runTask(DarkSkin.getInstance(),
-        ()-> e.getPlayer().openInventory(ExpShopGUI.getInventory((Player) e.getPlayer())));
+        () -> e.getPlayer().openInventory(ExpShopGUI.getInventory((Player) e.getPlayer())));
     }
   }
 
@@ -221,6 +247,7 @@ public class Events implements Listener {
 
   @EventHandler
   public void onPortal(PlayerPortalEvent e) {
+    System.out.println(e.getTo().getWorld().getName()); //TODO: 엔드인지 혹인
     if (!e.getTo().getWorld().getName().equals("nether")) return;
     Location loc = e.getTo().clone();
     loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));

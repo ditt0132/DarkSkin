@@ -82,14 +82,22 @@ public class DarkSkin extends JavaPlugin {
         .forEach(p -> p.setFireTicks(20)), 0L, 20L);
 
     Bukkit.getScheduler().runTaskTimer(this, () -> {
+      System.out.println("quizstartedcalcca,");
       if (Bukkit.getOnlinePlayers().isEmpty()) return;
       int idx = r.nextInt(3);
+      // TODO: 문제 발생: 이거 게임 뜨지가 않음 delay + period 된 느낌? -- 0L, 18000L 했으니까 확인해보기
       if (idx == 0) {
-        //TODO: 채팅 빨리치기 -- 아주 긴 인용구들? -- 햄릿
+        //TODO: 채팅 빨리치기 -- 아주 긴 인용구들? -- 햄릿 오픈소스로 된거 하나 불러오고 앞뒤 trim하고 15글자 이상 30글자 미만 나올떄까지 반복
+        // TODO - TEST
+        quizAnswer = RandomStringUtils.randomAscii(RandomUtils.nextInt(5, 15));
+        Bukkit.broadcast(mm.deserialize("타자대결! <green>%s</green>\n채팅에 최대한 빠르게 입력해주세요!"
+          .formatted(quizAnswer)));
+        // TEST END
         quizAnswer = ""; //get from hamlet.txt
         Bukkit.broadcast(mm.deserialize("타자대결! <green>%s</green>\n채팅에 최대한 빠르게 입력해주세요!"
           .formatted(quizAnswer)));
-      } else if (idx == 1) {
+      } //else -- 왜없엤냐면 테스트하려고
+      if (idx == 1) {
         quizAnswer = RandomStringUtils.randomAscii(RandomUtils.nextInt(5, 15));
         Bukkit.broadcast(mm.deserialize("타자대결! <green>%s</green>\n채팅에 최대한 빠르게 입력해주세요!"
           .formatted(quizAnswer)));
@@ -100,14 +108,15 @@ public class DarkSkin extends JavaPlugin {
           .formatted(a, b)));
         quizAnswer = String.valueOf(a * b);
       }
+
       Bukkit.getScheduler().runTaskLater(this, () -> {
         if (quizAnswer.isEmpty()) return; //누가 이미 퀴즈를 맞추면 answer 지워짐
         quizAnswer = "";
         if (quizAnswer.matches("\\d+"))
           Bukkit.broadcast(mm.deserialize("퀴즈가 끝났어요! 정답: <green>%s".formatted(quizAnswer)));
         else Bukkit.broadcast(mm.deserialize("타자대결이 끝났어요! 그 누구도 성공하지 못했어요..."));
-      }, 300L);
-    }, 36000L, 72000L); //30분 뒤에 실행, 그 후 1시간마다 퀴즈 출제!
+      }, 3000L); // 15초   TODO: 150초로 늘림 because 너무 빨리 끝남;;
+    }, 0L, 6000L); //15분 뒤에 실행, 그 후 15분마다 퀴즈 출제! TODO test = 5분
 
     getLogger().info("Enabled!");
   }
