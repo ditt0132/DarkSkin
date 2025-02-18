@@ -70,36 +70,6 @@ public class Events implements Listener {
     // add players to delayed(1m) with player that landed together (loop nearby 8b, only teams)
   }
 
-// 우리 귀여운 더티가 해줄거야
-//    @EventHandler
-//    public void onJump(PlayerJumpEvent e) {
-//        //System.out.println("WTF");
-//        if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().isCollidable()) e.getPlayer().setAllowFlight(true);
-//    }
-
-// 더티더티가 해주겠죠
-//    @EventHandler
-//    public void onDamage(EntityDamageEvent e) {
-//        if (!(e instanceof Player p)) return;
-//        if (!(e.getCause() == EntityDamageEvent.DamageCause.FALL)) return;
-//        if (p.getInventory().getBoots().isEmpty()) e.setCancelled(true); //여기에 아이템 강화 삽입
-//    }
-//이것도 더티가 해주겠죠
-//    @EventHandler
-//    public void onFlight(PlayerToggleFlightEvent e) {
-//        Player p = e.getPlayer();
-//        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR) return;
-//        Vector direction = p.getLocation().getDirection();
-//        Vector knockback = new Vector(direction.getX(), 0, direction.getZ()).normalize();//.multiply(1);
-//        knockback.setY(0.60);
-//        p.setVelocity(knockback);
-//        p.setAllowFlight(false);
-//        Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
-//            p.setFlying(false);
-//            //e.getPlayer().setAllowFlight(true);
-//        }); //
-//    }
-
   private static final double MAX_DISTANCE = 25.0d;
 
   @EventHandler
@@ -125,7 +95,9 @@ public class Events implements Listener {
   @EventHandler
   public void onPlace(BlockPlaceEvent e) {
     Location location = e.getBlockPlaced().getLocation();
-    if (e.getBlockPlaced().getState() instanceof Sign && !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25)) {
+    // 만약 설치블록이 표지판이고 오버월드에 설치한게 아니거나 00기준 +- 25x25 범위 밖인 경우
+    if (e.getBlockPlaced().getState() instanceof Sign &&
+      (!location.getWorld().getName().equals("world") || !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25))) {
       e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
       e.setCancelled(true);
     }
@@ -148,6 +120,8 @@ public class Events implements Listener {
       Bukkit.getScheduler().runTaskLater(DarkSkin.getInstance(), () -> {
         end.getPlayers().forEach(p -> {
           // 닫힐 시 침대 또는 파일런 또는 월드 스폰으로 이동
+          // TODO
+          // FIXME 이거 작동을 안함.
           Location home = p.getBedSpawnLocation();
           if (home == null) home = Pylon.pylonLocationOf(p);
           if (home == null) home = overworld.getSpawnLocation();

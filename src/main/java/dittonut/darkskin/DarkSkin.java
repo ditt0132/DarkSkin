@@ -82,10 +82,9 @@ public class DarkSkin extends JavaPlugin {
         .forEach(p -> p.setFireTicks(20)), 0L, 20L);
 
     Bukkit.getScheduler().runTaskTimer(this, () -> {
-      System.out.println("quizstartedcalcca,");
+      System.out.println("quizstarted");
       if (Bukkit.getOnlinePlayers().isEmpty()) return;
       int idx = r.nextInt(3);
-      // TODO: 문제 발생: 이거 게임 뜨지가 않음 delay + period 된 느낌? -- 0L, 18000L 했으니까 확인해보기
       if (idx == 0) {
         //TODO: 채팅 빨리치기 -- 아주 긴 인용구들? -- 햄릿 오픈소스로 된거 하나 불러오고 앞뒤 trim하고 15글자 이상 30글자 미만 나올떄까지 반복
         // TODO - TEST
