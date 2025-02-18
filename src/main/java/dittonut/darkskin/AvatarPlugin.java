@@ -1,6 +1,5 @@
-package com.example.plugin;
+package dittonut.darkskin;
 
-import dittonut.darkskin.FamilyUtil;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
