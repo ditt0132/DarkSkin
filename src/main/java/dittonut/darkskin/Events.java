@@ -100,6 +100,14 @@ public class Events implements Listener {
       (!location.getWorld().getName().equals("world") || !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25))) {
       e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
       e.setCancelled(true);
+    } else if (e.getBlockPlaced().getType() == Material.BEACON) {
+      if (FamilyUtil.getOwnerByMember(e.getPlayer()).getUniqueId().equals(e.getPlayer().getUniqueId())) {
+        e.getPlayer().sendMessage("파일런을 설치했어요!");
+        Config.get().beacons.put(e.getPlayer().getUniqueId(), location);
+      } else {
+        e.getPlayer().sendMessage(mm.deserialize("<red>가문장만 설치할 수 있어요!"));
+        e.setCancelled(true);
+      }
     }
   }
 

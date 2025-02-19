@@ -27,12 +27,14 @@ public class ExpShopGUI {
    * Seller: SERVER
    * Buyer: Player p
    * @param p the player buying items
-   * @param i the item. the method won't clone itemstack. itemstack's amount must be one (if else changed automatically)
+   * @param originalStack the item. the method won't clone itemstack. itemstack's amount must be one (if else changed automatically)
    * @param count the amount of it
    * @param cost item's cost in xp levels
    */
-  private static void sell(Player p, ItemStack i, int count, int cost) {
-    if (i.getAmount() != 1) i = Utils.withAmount(i, 1);
+  private static void sell(Player p, ItemStack originalStack, int count, int cost) {
+    ItemStack i;
+    if (originalStack.getAmount() != 1) i = Utils.withAmount(originalStack, 1);
+    else i = originalStack;
     if (hasLevel(p, cost)) {
       p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.86f);
       p.setLevel(p.getLevel() - cost);
