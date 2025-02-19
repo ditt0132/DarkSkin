@@ -140,7 +140,7 @@ public class AvatarPlugin extends JavaPlugin {
         }
     }
 
-    // 나갈때 아바타 눕게 만들기
+    // 나갈때 아바타 눕게 만들기임
     private void layDownAvatar(Player player) {
         ArmorStand avatar = player.getWorld().spawn(player.getLocation(), ArmorStand.class);
         avatar.setCustomName(player.getName() + "'s Avatar");
