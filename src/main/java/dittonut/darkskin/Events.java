@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.papermc.paper.event.player.ChatEvent;
 import io.papermc.paper.event.player.PlayerTradeEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.apache.commons.lang3.RandomUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,11 +40,14 @@ import net.skinsrestorer.api.exception.MineSkinException;
 import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 
 import static dittonut.darkskin.DarkSkin.*;
 
 public class Events implements Listener {
+  private static final double MAX_DISTANCE = 25.0d;
   public static PlainTextComponentSerializer plainText = PlainTextComponentSerializer.plainText();
 
   @EventHandler
@@ -69,8 +73,6 @@ public class Events implements Listener {
     if (e.getPlayer().getLocation().add(0, -0.001, 0).getBlock().getType() == Material.AIR) return;
     // add players to delayed(1m) with player that landed together (loop nearby 8b, only teams)
   }
-
-  private static final double MAX_DISTANCE = 25.0d;
 
   @EventHandler
   public void onVillager(PlayerTradeEvent e) {
@@ -229,10 +231,27 @@ public class Events implements Listener {
 
   @EventHandler
   public void onPortal(PlayerPortalEvent e) {
-    System.out.println(e.getTo().getWorld().getName()); //TODO: 엔드인지 혹인
-    if (!e.getTo().getWorld().getName().equals("nether")) return;
-    Location loc = e.getTo().clone();
-    loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName().substring(3)));
-    e.setTo(loc);
+    if (e.getTo().getWorld().getName().equals("world_the_end")) {
+      if (!Config.enableEnd) {
+        e.getPlayer().sendMessage(mm.deserialize("<red>엔드가 닫혀있어요!"));
+        e.setCancelled(true);
+        return;
+      } else {
+        // -25 to 25, 100, -25 to 25 random tp. Note: this mutates the location
+        e.getTo().set(-25.0 + (r.nextDouble() * 50.0), 100.0, -25.0 + (r.nextDouble() * 50.0));
+        e.getPlayer().addPotionEffect(new PotionEffect(
+          PotionEffectType.SLOW_FALLING,
+          10,
+          0,
+          false,
+          false,
+          false));
+        e.setCanCreatePortal(false);
+      }
+    } else if (!e.getTo().getWorld().getName().equals("world_nether")){
+      Location loc = e.getTo().clone();
+      loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName()));
+      e.setTo(loc);
+    }
   }
 }
