@@ -98,12 +98,26 @@ public class Events implements Listener {
   public void onPlace(BlockPlaceEvent e) {
     Location location = e.getBlockPlaced().getLocation();
     // 만약 설치블록이 표지판이고 오버월드에 설치한게 아니거나 00기준 +- 25x25 범위 밖인 경우
+    // TODO test this
     if (e.getBlockPlaced().getState() instanceof Sign &&
       (!location.getWorld().getName().equals("world") || !(Math.abs(location.getX()) <= 25 && Math.abs(location.getZ()) <= 25))) {
       e.getPlayer().sendMessage(mm.deserialize("<red>표지판은 0, 0 근처 25블록 이내에만 설치할 수 있어요!"));
       e.setCancelled(true);
-    } else if (e.getBlockPlaced().getType() == Material.BEACON) {
-      if (FamilyUtil.getOwnerByMember(e.getPlayer()).getUniqueId().equals(e.getPlayer().getUniqueId())) {
+    } else if (e.getBlockPlaced().getType() == Material.BEACON) { //TODO: test
+      // 어지러워서 대충 정리하면:
+      // 플레이어가 팀이 있고 가문장인가?
+      // NO->설치불가
+      // YES->
+      // 이미 파일런이 있는가?
+      // YES->설치불가
+      // NO->설치후 저장
+      if (FamilyUtil.hasTeam(e.getPlayer().getUniqueId())
+        && FamilyUtil.getOwnerByMember(e.getPlayer()).getUniqueId().equals(e.getPlayer().getUniqueId())) {
+        if (Config.get().beacons.containsKey(e.getPlayer().getUniqueId())) {
+          e.getPlayer().sendMessage(mm.deserialize("<red>이미 파일런이 있어요!"));
+          e.setCancelled(true);
+          return;
+        }
         e.getPlayer().sendMessage("파일런을 설치했어요!");
         Config.get().beacons.put(e.getPlayer().getUniqueId(), location);
       } else {
@@ -181,6 +195,7 @@ public class Events implements Listener {
   public void onClick(InventoryClickEvent e) {
     if (e.getView().title().equals(Config.get().ENCHANT_GUI_TITLE)) EnchantGUI.click(e);
     else if (e.getView().title().equals(Config.get().EXPSHOP_GUI_TITLE)) ExpShopGUI.click(e);
+    else if (e.getView().title().equals(Config.get().PYLON_GUI_TITLE)) PylonGUI.click(e);
   }
 
   @EventHandler
@@ -239,7 +254,7 @@ public class Events implements Listener {
       } else {
         // -25 to 25, 100, -25 to 25 random tp. Note: this mutates the location
         e.getTo().set(-25.0 + (r.nextDouble() * 50.0), 100.0, -25.0 + (r.nextDouble() * 50.0));
-        e.getPlayer().addPotionEffect(new PotionEffect(
+        e.getPlayer().addPotionEffect(new PotionEffect( //FIXME: 이거 1틱 뒤에 해야하나? 안먹음
           PotionEffectType.SLOW_FALLING,
           10,
           0,
@@ -250,7 +265,11 @@ public class Events implements Listener {
       }
     } else if (!e.getTo().getWorld().getName().equals("world_nether")){
       Location loc = e.getTo().clone();
-      loc.setWorld(Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName()));
+      World dest = e.getFrom().getWorld().getName().startsWith("nether_dt.")
+        ? Bukkit.getWorld("world")
+        : Bukkit.getWorld("nether_" + FamilyUtil.getTeam(e.getPlayer()).getName());
+      System.out.println(dest.getName());
+      loc.setWorld(dest); //포탈 돌아가는 로직 추가
       e.setTo(loc);
     }
   }

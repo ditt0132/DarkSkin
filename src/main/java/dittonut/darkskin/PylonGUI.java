@@ -7,9 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
@@ -60,20 +58,24 @@ public class PylonGUI {
 
     public static Inventory getInventory(Player p) {
         Inventory inv = Bukkit.createInventory(p, 27, Config.get().PYLON_GUI_TITLE);
-        ItemStack item = new ItemStack(Config.get().FILLER_ITEM);
-        ItemMeta meta = item.getItemMeta();
-        meta.setCustomModelData(Config.get().FILLER_MODEL);
-        meta.displayName(Component.text(""));
-        item.setItemMeta(meta);
+        ItemStack fill = new ItemStack(Config.get().FILLER_ITEM);
+        ItemMeta fillMeta = fill.getItemMeta();
+        fillMeta.setCustomModelData(Config.get().FILLER_MODEL);
+        fillMeta.displayName(Component.text(""));
+        fill.setItemMeta(fillMeta);
         for (int i = 0; i < inv.getSize(); i++) {
-            if (i == 4) continue;
-            inv.setItem(i, item.clone());
+            if (Set.of(10, 12, 14, 16).contains(i)) continue;
+            inv.setItem(i, fill.clone());
         }
+
+
         return inv;
     }
 
     public static void spawnClick(InventoryClickEvent e) {
-
+        if (!(e.getWhoClicked() instanceof Player p)) return;
+        p.playNote(p.getLocation(), Instrument.DIDGERIDOO, Note.sharp(0, Note.Tone.F));
+        p.sendMessage(mm.deserialize("<red>미구현 기능이에요!"));
     }
 
 //    public static void reviveClick(InventoryClickEvent e) {
@@ -96,14 +98,13 @@ public class PylonGUI {
                 && e.getCurrentItem().getItemMeta().hasCustomModelData()
                 && e.getCurrentItem().getItemMeta().getCustomModelData() == Config.get().FILLER_MODEL) {
         } else if (e.getSlot() == 10) { //소환,부활,경험치상점,별조각 플탐보상
-            //소헌 letsgo
-            //Player selection required btw
-            //see event handling at this#spawnClick method
-            //TODO: make this
-            //TODO: Find how many needed, it will be on playing
+            // 소환은 미구현
+            spawnClick(e);
         } else if (e.getSlot() == 12) {
             // TODO: 더티가 해줄거야
-            Bukkit.dispatchCommand(quietSender, "revivegui %s".formatted(e.getWhoClicked().getUniqueId().toString()));
+            Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> {
+                Bukkit.dispatchCommand(quietSender, "revivegui %s".formatted(e.getWhoClicked().getUniqueId().toString()));
+            });
         } else if (e.getSlot() == 14) {
             Bukkit.getScheduler().runTask(DarkSkin.getInstance(), () -> p.openInventory(ExpShopGUI.getInventory(p)));
         } else if (e.getSlot() == 16) {
@@ -115,23 +116,5 @@ public class PylonGUI {
             }
         }
         e.setCancelled(true);
-    }
-
-    private static boolean isEnchantable(ItemStack stack) {
-        return Arrays.stream(Enchantment.values())
-                .anyMatch(ench -> ench.canEnchantItem(stack));
-    }
-
-    private static @NotNull Enchantment randomEnchant(Enchantment... filtered) {
-        List<Enchantment> enchantments =
-                Arrays.stream(Enchantment.values())
-                        .filter(e -> !Arrays.asList(filtered).contains(e)).toList(); // I think return shouldnt null..
-        return enchantments.get(r.nextInt(enchantments.size()));
-    }
-
-    private static boolean containsAtLeast(Inventory inventory, Material mat, int amount) {
-        return inventory.all(mat).values().stream()
-                .mapToInt(ItemStack::getAmount)
-                .sum() >= amount;
     }
 }

@@ -3,6 +3,7 @@ package dittonut.darkskin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Config {
+  // TODO: test this
   private static Config instance;
   private static final MiniMessage mm = MiniMessage.miniMessage();
   private final File file;
@@ -41,7 +43,7 @@ public class Config {
   public Set<UUID> patrollers = new HashSet<>();
   public Set<UUID> rewarded = new HashSet<>();
   public Map<UUID, Location> beacons = new HashMap<>();
-  public Set<Chunk> forceLoads = new HashSet<>();
+  public Set<Chunk> forceLoads = new HashSet<>(); //TODO: update!
   public Set<UUID> banned = new HashSet<>();
 
   private Config() {
@@ -94,16 +96,24 @@ public class Config {
     for (String uuid : config.getStringList("banned")) {
       banned.add(UUID.fromString(uuid));
     }
+
+    beacons.clear();
+    ConfigurationSection beaconsMap = config.getConfigurationSection("beacons");
+    for (Map.Entry<String, Object> entry : config.getConfigurationSection("beacons").getValues(false).entrySet()) {
+      String key = entry.getKey();
+      Location loc = new Location(
+        Bukkit.getWorld(beaconsMap.getString(key+".world")),
+        beaconsMap.getDouble(key+"x"),
+        beaconsMap.getDouble(key+"y"),
+        beaconsMap.getDouble(key+"z")
+      );
+      beacons.put(UUID.fromString(key), loc);
+    }
   }
 
   public static void save() {
     if (instance == null) return;
-    new BukkitRunnable() {
-      @Override
-      public void run() {
-        instance.saveValues();
-      }
-    }.runTaskAsynchronously(DarkSkin.getInstance());
+    Bukkit.getScheduler().runTaskAsynchronously(DarkSkin.getInstance(), () -> instance.saveValues());
   }
 
   private void saveValues() {
@@ -135,6 +145,16 @@ public class Config {
       bannedList.add(uuid.toString());
     }
     config.set("banned", bannedList);
+
+    ConfigurationSection beaconsMap = config.getConfigurationSection("beacons");
+    for (Map.Entry<UUID, Location> entry : beacons.entrySet()) {
+      String key = entry.getKey().toString();
+      Location loc = entry.getValue();
+      beaconsMap.set(key+".world", loc.getWorld().getName());
+      beaconsMap.set(key+".x", loc.x());
+      beaconsMap.set(key+".y", loc.y());
+      beaconsMap.set(key+".z", loc.z());
+    }
 
     try {
       config.save(file);

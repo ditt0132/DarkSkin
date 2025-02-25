@@ -15,6 +15,9 @@ public class FamilyUtil {
   public static Team getTeam(UUID id) {
     return Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(id));
   }
+  public static boolean hasTeam(UUID id) {
+    return getTeam(id) != null;
+  }
   public static Team getTeam(OfflinePlayer p) {
     return getTeam(p.getUniqueId());
   }
