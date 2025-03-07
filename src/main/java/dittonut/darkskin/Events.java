@@ -84,8 +84,11 @@ public class Events implements Listener {
 
   @EventHandler
   public void onBreak(BlockBreakEvent e) {
-    if (e.getBlock().getType().name().contains("ORE")) {
-      e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
+//    if (e.getBlock().getType().name().contains("ORE")) {
+//      e.getBlock().getWorld().dropItem(e.getBlock().getLocation(), PylonGUI.getDailyReward());
+//    } TODO: 상의 후
+    if (e.getBlock().getType() == Material.BEACON) {
+
     }
   }
 

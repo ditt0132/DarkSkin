@@ -17,6 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 public class Config {
@@ -45,6 +46,7 @@ public class Config {
   public Map<UUID, Location> beacons = new HashMap<>();
   public Set<Chunk> forceLoads = new HashSet<>(); //TODO: update!
   public Set<UUID> banned = new HashSet<>();
+  public Set<String> webhooks = new HashSet<>();
 
   private Config() {
     this.file = new File(DarkSkin.getInstance().getDataFolder(), "config.yml");
@@ -108,6 +110,13 @@ public class Config {
         beaconsMap.getDouble(key+"z")
       );
       beacons.put(UUID.fromString(key), loc);
+    }
+
+    webhooks.clear();
+    ConfigurationSection whMap = config.getConfigurationSection("webhooks");
+    for (Map.Entry<String, Object> entry : config.getConfigurationSection("beacons").getValues(false).entrySet()) {
+      String key = entry.getKey();
+
     }
   }
 
